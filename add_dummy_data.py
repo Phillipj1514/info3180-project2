@@ -2,7 +2,7 @@ from app import db
 from app.models import *
 import datetime
 
-db.create_all()
+# db.create_all()
 # Add dummy data to the database from the model created
 user = Users("test","test","First","Last","fl@prj.com","a location","a test user profile","1.png",datetime.datetime.now())
 db.session.add(user)

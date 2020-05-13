@@ -5,7 +5,7 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 import os, json
-from app import app, db , login_manager
+from app import app, db, login_manager
 from flask import render_template, request,redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
