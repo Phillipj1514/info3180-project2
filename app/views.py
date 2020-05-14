@@ -314,7 +314,7 @@ def successResponse(message):
     return jsonify(message )
 
 def errorResponse(error):
-    return jsonify(error = error)  
+    return jsonify(error=error)
 
 ###
 # The functions below should be applicable to all Flask apps.
