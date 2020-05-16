@@ -55,7 +55,48 @@ const NotFound = Vue.component('not-found', {
 const Register = Vue.component('register', {
     template: `
     <div>
-        <h1>Register Page</h1>
+        <h1>Register</h1>
+        <div class="register-form-container">
+           <form enctype="multipart/form-data" action="/register" method="POST">
+            <div class="form-group">
+                <div class="form-label">Username</div>
+                <input type="text" class="form-control"></input>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Password</div>
+                <input type="text" class="form-control" placeholder="Username"></input>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Confirm Password</div>
+                <input type="text" class="form-control" placeholder="Username"></input>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Firstname</div>
+                <input type="text" class="form-control" placeholder="Username"></input>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Lastname</div>
+                <input type="text" class="form-control" placeholder="Username"></input>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Email</div>
+                <input type="text" class="form-control" placeholder="Username"></input>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Location</div>
+                <input type="text" class="form-control" placeholder="Username"></input>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Biography</div>
+                <input type="text" class="form-control" placeholder="Username"></input>
+            </div>
+                <div class="form-group">
+                    <div class="form-label">Photo</div>
+                    <div class="file-input-container">
+                        <input type="file" >Browse</input>
+                    </div>
+            </div>
+        </form>    
     </div>
     `,
     data: function () {
