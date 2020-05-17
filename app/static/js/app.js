@@ -32,7 +32,7 @@ Vue.component('app-footer', {
     template: `
     <footer>
         <div class="container">
-            <p>Copyright &copy; Flask Inc.</p>
+            <p>Copyright &copy; Photogram.</p>
         </div>
     </footer>
     `
@@ -40,23 +40,24 @@ Vue.component('app-footer', {
 
 const Home = Vue.component('home', {
    template: `
-    <div class="row landing-container">
-        <div class="col-md-4 landing-container-child">
-            <img src="/static/images/photogram.png" id="landing-img"/>
-        </div>
-        <div class="col-md-4  landing-container-child float-clear">
-          <div class="card">
-            <img class="card-img-top" src="static/images/photogram.png" alt="Card image cap">
+    <div class="home-page-container">
+        <div class="container home-cards">
+        <img src="/static/images/home.jpg" class='home-image' alt='Picture of a pink fall trees'/>
+        <div class="card home-auth-card">
+            <div class="row home-card-head">
+            <img class="card-header-image" src="static/images/photogram.png" alt="Photogram Logo">
+            <div class="home-card-header"> Photogram</div>
+            </div>
+            <hr class="divider"/>
             <div class="card-body">
-              <hr>
               <p class="card-text">Share photos of your favourite moments with friends, family and the world.</p>
-              <div >
+              <div class="home-btns">
                   <router-link class="btn btn-success col-md-5" to="/register">Register</router-link>
                   <router-link class="btn btn-primary col-md-5" to="/login">Login</router-link>
               </div>
             </div>
-          </div>  
-        </div>
+        </div> 
+        </div> 
     </div>
    `,
     data: function() {

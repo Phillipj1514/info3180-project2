@@ -1,11 +1,27 @@
 body {
-    padding-top: 5rem;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
     background-color: #efe7e2;
+    align-items: center;
+    justify-content: center;
+}
+
+html {
+    height: 100%;
+}
+
+#main, #app {
+    height: 100vh;
+}
+
+main {
+    height: 95vh;
 }
 
 .header-logo {
-    width: 2.5rem;
-    height: 2rem;
+    max-width: 2.5rem;
+    max-height: 2rem;
     flex: 1;
 }
 
@@ -37,4 +53,88 @@ body {
 
 .success {
     background-color: #89b23d;
+}
+
+.home-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    max-height: 300px;
+    flex-wrap: wrap;
+    margin: 0 1rem;
+}
+
+.full-height {
+    height: 95vh;
+}
+
+.home-page-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-image, .home-auth-card {
+    flex: 1 0 47%;
+    margin: 0 1rem;
+    max-width: 400px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.card-header-image {
+    max-height: 1rem;
+    max-width: 1.5rem;
+    margin-right: 20px;
+}
+
+.home-card-header {
+    font-family: 'Lobster', cursive;
+    font-size: 1.5rem;
+}
+
+.home-auth-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.home-card-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.card-body, .card-text {
+    width: 100%;
+    align-self: center;
+    text-align: center;
+}
+
+.home-btns {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.home-btns.btn {
+    max-width: 47%;
+    font-weight: bold;
+}
+
+.divider {
+    background-color: #d3d3d3;
+    border: 1px solid #d3d3d3;
+    width: 80%;
 }
