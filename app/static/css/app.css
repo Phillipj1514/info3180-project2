@@ -1,3 +1,40 @@
 body {
     padding-top: 5rem;
+    background-color: #efe7e2;
+}
+
+.header-logo {
+    width: 2.5rem;
+    height: 2rem;
+    flex: 1;
+}
+
+.navbar-brand {
+    font-family: 'Lobster', cursive;
+    color: 	#f9fcff;
+    flex: 6 0 60%;
+    margin-left: 10px;
+}
+
+.navbar-toggler {
+    flex: 1 0 10%;
+}
+
+.nav-link {
+    font-family: 'Roboto', sans-serif;
+    font-weight: normal;
+    font-size: 1rem;
+    color: 	#f9fcff;
+}
+
+.navbar, .navbar-nav {
+    background-color: #4a90e2;
+}
+
+.btn-primary {
+    background-color: #4a90e2;
+}
+
+.success {
+    background-color: #89b23d;
 }
