@@ -138,3 +138,15 @@ main {
     border: 1px solid #d3d3d3;
     width: 80%;
 }
+
+.no-error {
+    visibility: hidden;
+}
+
+.error {
+    visibility: visible;
+    color: red;
+    font-size: 15px;
+    margin-top: 3px;
+    margin-left: 2px;
+}

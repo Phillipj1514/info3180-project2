@@ -52,8 +52,8 @@ const Home = Vue.component('home', {
             <div class="card-body">
               <p class="card-text">Share photos of your favourite moments with friends, family and the world.</p>
               <div class="home-btns">
-                  <router-link class="btn btn-success col-md-5" to="/register">Register</router-link>
-                  <router-link class="btn btn-primary col-md-5" to="/login">Login</router-link>
+                  <button class="btn btn-success col-md-5" v-on:click="onClickRegister">Register</button>
+                  <button class="btn btn-primary col-md-5" v-on:click="onClickLogin">Login</button>
               </div>
             </div>
         </div> 
@@ -62,6 +62,16 @@ const Home = Vue.component('home', {
    `,
     data: function() {
        return {}
+    },
+    methods: {
+        onClickRegister: function (event) {
+            const router = this.$router;
+            router.push("/register")
+        },
+        onClickLogin: function (event) {
+            const router = this.$router;
+            router.push("/login")
+        }
     }
 });
 
@@ -79,61 +89,150 @@ const NotFound = Vue.component('not-found', {
 
 const Register = Vue.component('register', {
     template: `
-    <div>
+    <div class="container regular">
         <h1>Register</h1>
         <div class="auth-form-container">
-           <form enctype="multipart/form-data" action="/register" method="POST" class="col-md-12">
+           <form id="registrationForm" enctype="multipart/form-data" method="POST" class="col-md-12" @submit.prevent="onRegister">
             <div class="form-group">
                 <label class="form-label" for="usernameField">Username</label>
-                <input type="text" class="form-control" id="usernameField" placeholder="Enter username" required></input>
-                <div class="invalid-feedback">This field is required</div>
+                <input type="text" class="form-control" id="usernameField" placeholder="Enter username" required v-model="formData.username" minlength="1" maxlength="20"></input>
+                <div class="no-error" id="usernameError">Your username can only contain letters and numbers</div>
             </div>
             <div class="form-group">
                 <label class="form-label" for="passwordField">Password</label>
-                <input type="password" class="form-control" id = "passwordField" placeholder="Enter password" required></input>
-                <div class="invalid-feedback">This field is required</div>
+                <input type="password" class="form-control" id = "passwordField" placeholder="Enter password" minlength="1" maxlength="20" required v-model="formData.password"></input>
+                <div class="no-error" id="passwordError">Your password must contain at least 8 characters, a letter and a number.</div>
             </div>
             <div class="form-group">
                 <label class="form-label" for="confirmPasswordField">Confirm Password</label>
-                <input type="password" id="confirmPasswordField" class="form-control" placeholder="Enter password again" required>
-                <div class="invalid-feedback">This field is required</div>
+                <input type="password" id="confirmPasswordField" class="form-control" placeholder="Enter password again" minlength="1" maxlength="20" required v-model="formData.confirmPassword">
+                <div class="no-error" id="confirmPasswordError">Both passwords must be the same. Enter again.</div>
             </div>
             <div class="form-group">
                 <label class="form-label" for="firstnameField">Firstname</label>
-                <input type="text" class="form-control" placeholder="Enter firstname" id="firstnameField" required></input>
-                <div class="invalid-feedback">This field is required</div>
+                <input type="text" class="form-control" placeholder="Enter firstname" id="firstnameField" required minlength="8" maxlength="20" v-model="formData.firstname"></input>
+                <div class="no-error" id="firstnameError">Your firstname cannot contain special characters apart from a hyphen or apostrophe.</div>
             </div>
             <div class="form-group">
                 <label class="form-label" for="lastnameField">Lastname</label>
-                <input type="text" id="lastnameField" class="form-control" placeholder="Enter lastname" required></input>
-                <div class="invalid-feedback">This field is required</div>
+                <input type="text" id="lastnameField" class="form-control" placeholder="Enter lastname" required minlength="8" maxlength="20" v-model="formData.lastname"></input>
+                <div class="no-error" id="lastnameError">Your lastname cannot contain special characters apart from a hyphen or apostrophe.</div>
             </div>
             <div class="form-group">
                 <label class="form-label" for="emailField">Email</label>
-                <input type="email" class="form-control" placeholder="Enter email" id="emailField" required></input>
-                <div class="invalid-feedback">This field is required</div>
+                <input type="email" class="form-control" placeholder="Enter email" id="emailField" required minlength="1" maxlength="20" v-model="formData.email"></input>
             </div>
             <div class="form-group">
                 <label class="form-label" for="locationField">Location</label>
-                <input type="text" id="locationField" class="form-control" placeholder="Where are you from?" required></input>
-                <div class="invalid-feedback">This field is required</div>
+                <input type="text" id="locationField" class="form-control" placeholder="Where are you from? eg. Kingston, Jamaica" minlength="3" maxlength="20" required v-model="formData.location"></input>
+                <div class="no-error" id="locationError">Location should be in the format 'City, Country'</div>
             </div>
             <div class="form-group">
                 <label class="form-label" for="biographyField">Biography</label>
-                <textarea class="form-control" placeholder="Tell us a little about you." id="biographyField" rows="4" required></textarea>
-                <div class="invalid-feedback">This field is required</div>
+                <textarea class="form-control" placeholder="Tell us a little about you." id="biographyField" rows="4" minlength="1" maxlength="255"required v-model="formData.biography"></textarea>
             </div>
             <div class="form-group d-flex flex-column">
                 <label class="form-label" for="photoField">Photo</label>
-                <input type="file" id="photoField" required></input>
-                <div class="invalid-feedback">This field is required</div>
+                <input type="file" id="photoField" accept="image/*" v-on:change="savePhoto($event.target.files)" required></input>
             </div>
             <button type="submit" class="btn btn-primary">Register</button>
-        </form>    
+        </form>
+    </div>    
     </div>
     `,
     data: function () {
-        return {}
+        return {
+            formData: {
+                username: "",
+                password: "",
+                confirmPassword: "",
+                firstname: "",
+                lastname: "",
+                email: "",
+                location: "",
+                biography: "",
+                photo: null
+            }
+        }
+    },
+    methods: {
+        onRegister: function () {
+                      
+
+            if (this.validateForm()) {
+                //make ajax request
+                console.log('success');
+            } else {
+
+                console.log('fails');
+            }
+        },
+        validateForm() {
+            let validForm = true;
+            let passwordRegex = new RegExp('^[a-zA-Z0-9]+(([\',. -][a-zA - Z0 - 9 ]) ? [a - zA - Z0 - 9] *)*$');
+            let nameRegex = new RegExp('^[a-zA-Z]+(([\'-][a-zA-Z ])?[a-zA-Z]*)*$');
+            let userNameRegex = new RegExp('^[a-zA-Z0-9.]+$');
+            let locationRegex = new RegExp('^[a-zA-Z]+(([\',. -][a-zA-Z ])?[a-zA-Z]*)*$');
+
+
+            const errorDivs = document.getElementsByClassName('error');
+            
+            (Array.from(errorDivs)).forEach(div => {
+                div.setAttribute('class', 'no-error')
+            });
+
+            //check for username format errors
+            if (!userNameRegex.test(this.username)) {
+                validForm = false;
+                const unameError = document.getElementById('usernameError');
+                unameError.setAttribute('class', 'error');
+            }
+
+            //check for password format errors
+            if (!passwordRegex.test(this.formData.password)) {
+                validForm = false;
+                const passwordError = document.getElementById('passwordError');
+                passwordError.setAttribute('class', 'error');
+            }
+
+            //check for password match if password format is correct
+
+            if (passwordRegex.test(this.formData.password)) {
+                if (!(this.formData.password === this.formData.confirmPassword)) {
+                    validForm = false;
+                    const confirmPasswordError = document.getElementById('confirmPasswordError');
+                    confirmPasswordError.setAttribute('class', 'error');
+                }
+            }
+
+            //check for correct firstname format
+            if (!nameRegex.test(this.formData.firstname)) {
+                validForm = false;
+                const firstnameError = document.getElementById('firstnameError');
+                firstnameError.setAttribute('class', 'error');
+            }
+
+            //check for correct lastname format
+            if (!nameRegex.test(this.formData.lastname)) {
+                validForm = false;
+                const lastnameError = document.getElementById('lastnameError');
+                lastnameError.setAttribute('class', 'error');
+            }
+
+            //check for correct location format
+            if (!locationRegex.test(this.formData.location)) {
+                validForm = false;
+                const locationError = document.getElementById('locationError');
+                locationError.setAttribute('class', 'error');
+            }
+
+            return validForm;
+        },
+        savePhoto(fileList) {
+            if(fileList.length > 0) {
+                this.photo = fileList[0];
+            }
+        }
     }
 })
 
@@ -143,7 +242,7 @@ const Login = Vue.component('login', {
         <div>
             <h1>Login</h1>
             <div class="auth-form-container">
-                <form class="" action="" method="POST">
+                <form id="loginForm" class="" action="" method="POST">
                     <div class="form-group">
                         <label class="form-label" for="usernameField">Username</label>
                         <input type="text" id="usernameField" required></input>
