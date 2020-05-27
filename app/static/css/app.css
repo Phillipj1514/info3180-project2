@@ -150,3 +150,42 @@ main {
     margin-top: 3px;
     margin-left: 2px;
 }
+
+.auth-form-container {
+    margin-top: 1rem;
+    padding: 30px 20px;
+    width: 80%;
+    min-width: 280px;
+    background-color: #fff;
+    border-radius: 10px;;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+
+.regular {
+    margin-top: 5.5rem;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+footer {
+    margin-top: 1rem;
+    position: fixed;
+}
+
+.reg-btn {
+    min-width: 250px;
+    width: 100%;
+    align-self: center;
+    margin-top: 25px;
+}
+
+#registrationForm {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

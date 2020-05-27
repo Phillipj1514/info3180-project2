@@ -51,38 +51,46 @@ def form_errors(form):
 def userRegister():
     userRegistrationForm = UserRegistrationForm(csrf_enabled=False)
     submission_errors = []
-    if request.method == 'POST' and userRegistrationForm.validate_on_submit():
-        success = True   
-        username = userRegistrationForm.username.data
-        password = userRegistrationForm.password.data
-        confirmed_password  = userRegistrationForm.confirm_password.data
-        firstname = userRegistrationForm.firstname.data
-        lastname = userRegistrationForm.lastname.data
-        email = userRegistrationForm.email.data
-        location = userRegistrationForm.location.data
-        biography = userRegistrationForm.biography.data
-        profile_photo = userRegistrationForm.profile_photo.data
-        profile_photo_name = secure_filename(profile_photo.filename)
-        if(password != confirmed_password): 
-            success = False
-            submission_errors.append("password and confirm passowrd is different")
-        if(not Users.query.filter_by(firstname=username).first() is None): 
-            success = False
-            submission_errors.append("username unavailable")
-        if( not Users.query.filter_by(email=email).first() is None):
-            success = False
-            submission_errors.append("email already used")
-        # Save the data if the information entered is valid and new 
-        if(success):
-            profile_photo.save(os.path.join(
-                app.config['UPLOAD_FOLDER'],profile_photo_name
-            ))
-            user = Users(username,password,firstname,lastname, email, location, biography, profile_photo_name,datetime.datetime.now())
-            db.session.add(user)
-            db.session.commit()
-            return successResponse({"message": "User successfully registered"}),201
-    # If the form fail to submit it returns an error message
-    return errorResponse(form_errors(userRegistrationForm)+submission_errors),400
+    if request.method == 'POST':
+        print(request.body)
+        print(userRegistrationForm)
+
+        if userRegistrationForm.validate_on_submit():
+            success = True   
+            username = userRegistrationForm.username.data
+            password = userRegistrationForm.password.data
+            confirmed_password  = userRegistrationForm.confirm_password.data
+            firstname = userRegistrationForm.firstname.data
+            lastname = userRegistrationForm.lastname.data
+            email = userRegistrationForm.email.data
+            location = userRegistrationForm.location.data
+            biography = userRegistrationForm.biography.data
+            profile_photo = userRegistrationForm.profile_photo.data
+            profile_photo_name = secure_filename(profile_photo.filename)
+            if(password != confirmed_password): 
+                success = False
+                submission_errors.append("password and confirm passowrd is different")
+            if(not Users.query.filter_by(firstname=username).first() is None): 
+                success = False
+                submission_errors.append("username unavailable")
+            if( not Users.query.filter_by(email=email).first() is None):
+                success = False
+                submission_errors.append("email already used")
+            # Save the data if the information entered is valid and new 
+            if(success):
+                profile_photo.save(os.path.join(
+                    app.config['UPLOAD_FOLDER'],profile_photo_name
+                ))
+                user = Users(username,password,firstname,lastname, email, location, biography, profile_photo_name,datetime.datetime.now())
+                db.session.add(user)
+                db.session.commit()
+                return successResponse({"message": "User successfully registered"}),201
+        # If the form fail to submit it returns an error message
+        return errorResponse(form_errors(userRegistrationForm)+submission_errors),400
+    return errorResponse({
+        "message": "Method not allowed"
+    }), 405
+
 
 # user login endpoint
 @app.route('/api/auth/login', methods=['POST'])
