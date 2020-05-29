@@ -183,19 +183,22 @@ const Register = Vue.component('register', {
 
 const Login = Vue.component('login', {
     template: `
-        <div>
+        <div class="container regular">
             <h1>Login</h1>
             <div class="auth-form-container">
-                <form id="loginForm" class="" action="" method="POST">
+                <div class="message-container">
+                <ul class="alert alert-danger" v-if="formValid === 'not_valid'" id="errors">
+                    <li v-for="error in errors"> {{ error }} </li>
+                </ul>
+            </div>
+                <form @submit.prevent="onLogin" id="loginForm" class="login-form">
                     <div class="form-group">
                         <label class="form-label" for="usernameField">Username</label>
-                        <input type="text" id="usernameField" required></input>
-                        <div class="invalid-feedback">This field is required.</div>
+                        <input type="text" id="usernameField" name="username" class="form-control"/>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="passwordField">Password</label>
-                        <input type="password" id="pasdwordField" required></input>
-                        <div class="invalid-feedback">This field is required.</div>
+                        <input type="password" id="passwordField" name="password" class="form-control"/>
                     </div>
                     <br/>
                     <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
@@ -204,7 +207,34 @@ const Login = Vue.component('login', {
     </div>
     `,
     data: function () {
-        return {}
+        return {
+            formValid: false,
+            errors: []
+        }
+    },
+    methods: {
+        onLogin: function() {
+            let self = this;
+            let form = document.getElementById('loginForm');
+            let uformdata = new FormData(form);
+            let token = localStorage.getItem('token');
+
+            fetch("/api/auth/login"), {
+                method: 'POST',
+                body: uformdata,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': token,
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(jResponse) {
+                //if jResponse.has
+            });
+        }
     }
 })
 
