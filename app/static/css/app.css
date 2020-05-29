@@ -189,3 +189,8 @@ footer {
     flex-direction: column;
     justify-content: center;
 }
+
+
+.alert {
+    padding-left: 10px;
+}

@@ -92,53 +92,52 @@ const Register = Vue.component('register', {
     <div class="container regular">
         <h1>Register</h1>
         <div class="auth-form-container">
-        <div class="message-container">
-            <p class="alert alert-success" v-if="formValid == 'valid'" id = "success"> {{ message }} </p>
-            <ul class="alert alert-danger" v-if="formValid === 'not_valid'" id="errors">
-                <li v-for="error in errors"> {{ error }} </li>
-            </ul>
-        </div>
+            <div class="message-container">
+                <ul class="alert alert-danger" v-if="formValid === 'not_valid'" id="errors">
+                    <li v-for="error in errors"> {{ error }} </li>
+                </ul>
+            </div>
 
-           <form id="registrationForm" enctype="multipart/form-data" method="POST" class="col-md-12" @submit.prevent="onRegister">
-            <div class="form-group">
-                <label class="form-label" for="usernameField">Username</label>
-                <input type="text" class="form-control" id="usernameField" name="username"></input>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="passwordField">Password</label>
-                <input type="password" class="form-control" id = "passwordField" name="password"></input>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="confirmPasswordField">Confirm Password</label>
-                <input type="password" name="confirm_password" id="confirmPasswordField" class="form-control" placeholder="Enter password again">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="firstnameField">Firstname</label>
-                <input type="text" name="firstname" class="form-control" id="firstnameField"></input>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="lastnameField">Lastname</label>
-                <input type="text" id="lastnameField" class="form-control" name="lastname"></input>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="emailField">Email</label>
-                <input type="email" class="form-control" id="emailField" name="email"></input>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="locationField">Location</label>
-                <input type="text" id="locationField" class="form-control" placeholder="Where are you from? eg. Kingston, Jamaica" name="location"></input>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="biographyField">Biography</label>
-                <textarea class="form-control" name="biography" placeholder="Tell us a little about you." id="biographyField" rows="4"></textarea>
-            </div>
-            <div class="form-group d-flex flex-column">
-                <label class="form-label" for="photoField">Photo</label>
-                <input type="file" name="profile_photo" id="photoField" accept="image/*"></input>
-            </div>
-            <button type="submit" class="btn btn-success reg-btn">Register</button>
-        </form>
-    </div>    
+           <form @submit.prevent="onRegister" id="registrationForm" enctype="mutipart/form-data" class="col-md-12">
+                <div class="form-group">
+                    <label class="form-label" for="usernameField">Username</label>
+                    <input type="text" class="form-control" id="usernameField" name="username"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="passwordField">Password</label>
+                    <input type="password" class="form-control" id = "passwordField" name="password"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="confirmPasswordField">Confirm Password</label>
+                    <input type="password" name="confirm_password" id="confirmPasswordField" class="form-control" placeholder="Enter password again"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="firstnameField">Firstname</label>
+                    <input type="text" name="firstname" class="form-control" id="firstnameField"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="lastnameField">Lastname</label>
+                    <input type="text" id="lastnameField" class="form-control" name="lastname"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emailField">Email</label>
+                    <input type="email" class="form-control" id="emailField" name="email"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="locationField">Location</label>
+                    <input type="text" id="locationField" class="form-control" placeholder="Where are you from? eg. Kingston, Jamaica" name="location"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="biographyField">Biography</label>
+                    <textarea class="form-control" name="biography" placeholder="Tell us a little about you." id="biographyField" rows="4"></textarea>
+                </div>
+                <div class="form-group d-flex flex-column">
+                    <label class="form-label" for="photoField">Photo</label>
+                    <input type="file" name="profile_photo" id="photoField"/>
+                </div>
+                <button type="submit" name="submit" class="btn btn-success reg-btn">Register</button>
+            </form>
+        </div>    
     </div>
     `,
     data: function () {
@@ -150,26 +149,27 @@ const Register = Vue.component('register', {
     },
     methods: {
         onRegister: function () {
-            
-            let regForm = document.getElementById('registrationForm');
-            let formdata = new FormData(regForm);
-
             let self = this;
-
+            let regForm = document.getElementById('registrationForm');
+            var uformdata = new FormData(regForm);
+            console.log(uformdata.get("email"));
             fetch("/api/users/register", {
                 method: 'POST',
-                body: formdata
+                body: uformdata,
+                headers: {
+                    'X-CSRFToken': token
+                },
+                credentials: 'same-origin'
             })
             .then(function(response) {
                 return response.json();
             })
             .then(function (jResponse) {
                 if (jResponse.hasOwnProperty("error")){
-                    this.errors = jResponse.error.error;
-                    this.formValid = 'not_valid';
+                    self.errors = jResponse.error;
+                    self.formValid = 'not_valid';
                 } else {
-                    this.message = jResponse.message.message;
-                    this.formValid = 'valid';
+                    self.message = jResponse.message;
                     router.push('/login');
                 }
             })
