@@ -196,7 +196,7 @@ const Login = Vue.component('login', {
                     <input type="password" id="passwordField" name="password" class="form-control"/>
                 </div>
                 <br/>
-                <div class="login-ins">Don't have an acccount <em class="register-link" v-on:click="register">Register Here</em></div>
+                <div class="login-ins">Don't have an acccount <em class="register-link link" v-on:click="register">Register Here</em></div>
                 <br/>
                 <button type="submit" name="submit" class="btn btn-success" id="loginBtn">Login</button>
             </form>
@@ -214,7 +214,7 @@ const Login = Vue.component('login', {
             let self = this;
             let lForm = document.getElementById('loginForm');
             let lformdata = new FormData(lForm);
-            console.log(lformdata.get("username"));
+            //console.log(lformdata.get("username"));
 
             fetch('/api/auth/login', {
                 method: 'POST',
@@ -228,9 +228,10 @@ const Login = Vue.component('login', {
                 return response.json();
             })
             .then(function(jResponse) {
-                console.log(jResponse);
+                //console.log(jResponse);
                 if (jResponse.hasOwnProperty("message")) {
                     localStorage.setItem('token', jResponse.token);
+                    localStorage.setItem('userId', jResponse.userId);
                     router.push('/explore');
                 } else {
                     self.errors = jResponse.error;
@@ -250,22 +251,22 @@ const Login = Vue.component('login', {
 const Feed = Vue.component('feed', {
     template: `
     <div class="container feed-page">
-        <div class="no-content alert alert-info" v-if="showPosts = 'show'">There are no posts to show yet. Go create a post!</div>
+        <div class="no-content alert alert-info" v-if="showPosts == 'show'">There are no posts to show yet. Go create a post!</div>
         <div class="feed-posts" v-for="(index, post) in posts">
             <div class="post card">
                 <div class="post-header">
-                    <img v-bind:src="'app/static/images/profile_photos/' + post.user_photo" height="30" width="30" />
+                    <img v-bind:src="'app/static/images/profile_photos/' + post.user_photo" height="30" width="30" class="img img-responsive img-circle" />
                     <div class="poster" v-on:click="goToProfile(post.user_id)">{{ post.user_name }}</div>                        
                 </div>
-                <img class="post-image" v-bind:src="'static/images/posts/' + post.photo width="500" height="500"/>
+                <img class="post-image img-responsive img" v-bind:src="'app/static/images/posts/' + post.photo" width="500" height="500"/>
                 <div class='post-caption'>{{ post.caption }}</div>
                 <div class="post-footer">
                     <div class="like-details footer-left">
-                        <i v-if="post.user_liked == True" class="fa fa-heart"></i>
-                        <i v-if="post.user_liked == False" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
+                        <i v-if="post.user_liked == true" class="fa fa-heart"></i>
+                        <i v-if="post.user_liked == false" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
                         {{ post.likes }} Likes
                     </div>
-                    <div class="alert alert-info" v-if="attemptLike === post.id &&& message !== ''"> {{ message }}</div>
+                    <div class="alert alert-info" v-if="attemptLike === post.id && message !== ''"> {{ message }}</div>
                     <div class="footer-right">{{ post.created_on }}</div>
                 </div>
 
@@ -286,15 +287,19 @@ const Feed = Vue.component('feed', {
     },
     created: function() {
         let self = this;
-        //self.getPosts();
-        self.userDetails = getUserDetails();
+        self.posts = self.getPosts();
     },
     methods: {
         getPosts: function() {
             let self = this;
 
-            let userToken = this.getUserToken();
-            let csrfToken = token;
+            let userToken = self.getUserToken();
+            let csrfToken = '';
+            try{
+                csrfToken = token;
+            } catch {
+                router.push('/login');
+            }
 
             if (userToken === csrfToken) {
                 router.push('/login');
@@ -310,11 +315,12 @@ const Feed = Vue.component('feed', {
                     if (response.status === 200) {
                         return response.json();
                     } else {
-                        router.push('/login');
+                        console.log(response.statusText);
                     }
                 })
                 .then(function(jResponse) {
                     self.posts = jResponse.posts;
+                    console.log(self.posts);
                     self.showPosts =  self.posts !== []? 'show' : 'hide';
                 })
                 .catch(function(err) {
@@ -323,7 +329,7 @@ const Feed = Vue.component('feed', {
             }
         },
         getUserToken: function() {
-            let uToken = localStorage.getIten('token') || token;
+            let uToken = localStorage.getItem('token') || token;
             return uToken;
         },
         createPost: function() {
@@ -401,19 +407,24 @@ const CreatePost = Vue.component('post', {
     },
     methods: {
         getUserToken: function() {
-            let uToken = localStorage.getIten('token') || token;
+            let uToken = localStorage.getItem('token') || token;
             return uToken;
         },
         createPost: function() {
             let userToken = this.getUserToken();
-            let csrfToken = token;
+            let csrfToken = '';
+            try{
+                csrfToken = token;
+            } catch {
+                router.push('/login');
+            }
 
             if (userToken === csrfToken) {
                 router.push('/login');
             } else {
 
                 let self = this;
-                let userId = 2;
+                let userId = localStorage.getItem("userId");
                 let postForm = document.getElementById('newPostForm');
                 let uformdata = new FormData(postForm);
 
@@ -426,7 +437,7 @@ const CreatePost = Vue.component('post', {
                     }
                 })
                 .then(function(response) {
-                    if (response.status === 200) {
+                    if (response.status === 201) {
                         router.push('/explore')
                     } else {
                         return response.json(); 

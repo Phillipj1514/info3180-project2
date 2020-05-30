@@ -65,9 +65,10 @@ def userRegister():
         profile_photo = userRegistrationForm.profile_photo.data
 
         fileuid = str(uuid.uuid4())
-        oldfilename = profile_photo.filename
-        ext = oldfilename.split(".")[1]
-        profile_photo_name = (fileuid + oldfilename + "." + ext).replace('-', '_')
+        oldfilename = profile_photo.filename.split(".")
+        name = oldfilename[0]
+        ext = oldfilename[-1]
+        profile_photo_name = (fileuid + name + "." + ext).replace('-', '_')
         profile_photo_name = secure_filename(profile_photo_name)
 
         if(password != confirmed_password): 
@@ -109,9 +110,13 @@ def login():
             # and generate the user token
             payload = {"userid":user.id,"time":datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
             token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-            return successResponse({'message': username+" User successfully logged in.", "token": token}),200
+            return successResponse({
+                'message': username+" User successfully logged in.", 
+                "token": token,
+                "userId": user.id
+            }),200
         # Add user validation error
-        submission_errors.append("username or password invallid")
+        submission_errors.append("username or password invalid")
 
     return errorResponse(form_errors(loginForm)+submission_errors),403
 
@@ -171,14 +176,21 @@ def createUserPost(user_id):
         success = True  
         caption = addPostForm.caption.data
         photo = addPostForm.photo.data
-        photo_name = secure_filename(photo.filename)
+
+        fileuid = str(uuid.uuid4())
+        oldfilename = photo.filename.split(".")
+        name = oldfilename[0]
+        ext = oldfilename[-1]
+        photo_name = (fileuid + name + "." + ext).replace('-', '_')
+        photo_name = secure_filename(photo_name)
+
         # check to ensure user id is present
         if(user is None ):
             success = False
             submission_errors.append("user id invalid")
         if(success):
             photo.save(os.path.join(
-                app.config['UPLOAD_FOLDER'],photo_name
+                posts_folder, photo_name
             ))
             # create the post and add it to the database
             post = Posts(user_id, photo_name, caption, datetime.datetime.now())
@@ -208,12 +220,17 @@ def getUserPosts(user_id):
     return errorResponse(submission_errors),400
 
 def getPostDetails(post):
-    userDet = Users.query.filter(Users.user_id == post.user_id).first()
+    userDet = Users.query.filter(Users.id == post.user_id).first()
+    print(userDet)
     user_name = userDet.username
     user_photo = userDet.profile_photo
-    likes = Likes.query.filter_by(Likes.post_id == post.id).count()
-    user_like = Likes.query.filter_by(Likes.user_id == post.user_id, Likes.post_id == post.id).first()
+    likes = Likes.query.filter(Likes.post_id == post.id).count()
+    user_like = Likes.query.filter(Likes.post_id == post.id).filter(Likes.user_id == post.user_id).first()
     user_liked = False
+
+    if (not user_like is None):
+        user_liked = True
+
     print("user likes", user_like)
     item = {
         "id": post.id,
