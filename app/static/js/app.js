@@ -84,7 +84,6 @@ const NotFound = Vue.component('not-found', {
     }
 })
 
-
 const Register = Vue.component('register', {
     template: `
     <div class="container regular">
@@ -177,17 +176,16 @@ const Register = Vue.component('register', {
     }
 });
 
-
 const Login = Vue.component('login', {
     template: ` 
         <div class="container regular">
             <h1>Login</h1>
             <div class="auth-form-container">
                 <div class="message-container">
-                <ul class="alert alert-danger" v-if="formValid === 'not_valid'" id="errors">
-                    <li v-for="error in errors"> {{ error }} </li>
-                </ul>
-            </div>
+                    <ul class="alert alert-danger" v-if="formValid === 'not_valid'" id="errors">
+                        <li v-for="error in errors"> {{ error }} </li>
+                    </ul>
+                </div>
             <form @submit.prevent="onLogin" enctype="mutipart/form-data" id="loginForm" class="login-form col-md-12">
                 <div class="form-group">
                     <label class="form-label" for="usernameField">Username</label>
@@ -198,7 +196,9 @@ const Login = Vue.component('login', {
                     <input type="password" id="passwordField" name="password" class="form-control"/>
                 </div>
                 <br/>
-                <button type="submit" name="submit" class="btn btn-primary" id="loginBtn">Login</button>
+                <div class="login-ins">Don't have an acccount <em class="register-link" v-on:click="register">Register Here</em></div>
+                <br/>
+                <button type="submit" name="submit" class="btn btn-success" id="loginBtn">Login</button>
             </form>
         </div>
     </div>
@@ -228,7 +228,9 @@ const Login = Vue.component('login', {
                 return response.json();
             })
             .then(function(jResponse) {
+                console.log(jResponse);
                 if (jResponse.hasOwnProperty("message")) {
+                    localStorage.setItem('token', jResponse.token);
                     router.push('/explore');
                 } else {
                     self.errors = jResponse.error;
@@ -238,70 +240,215 @@ const Login = Vue.component('login', {
             .catch(function(err) {
                 console.log(err);
             });  
+        },
+        register: function() {
+            router.push('/register');
         }
     }
 });
 
 const Feed = Vue.component('feed', {
     template: `
-    <div class="container">
-        <div class="feed-posts">
+    <div class="container feed-page">
+        <div class="no-content alert alert-info" v-if="showPosts = 'show'">There are no posts to show yet. Go create a post!</div>
+        <div class="feed-posts" v-for="(index, post) in posts">
             <div class="post card">
                 <div class="post-header">
-                    <img src='static/images/photogram.png' height="30" width="30" />
-                    <div class="poster"></div>                        
+                    <img v-bind:src="'app/static/images/profile_photos/' + post.user_photo" height="30" width="30" />
+                    <div class="poster" v-on:click="goToProfile(post.user_id)">{{ post.user_name }}</div>                        
                 </div>
-                <img class="post-image" src='static/images/uploads/2.jpg' width="500" height="500"/>
-                <div class='post-caption'>I was once a stranger walking through this city. I wmanaged to dlkdlksdlkdlklkdlk lorem impsum dloeremand fk lkdj kja j;kd djlk ddkljdsljdsijepi ddjhdoirj fj</div>
+                <img class="post-image" v-bind:src="'static/images/posts/' + post.photo width="500" height="500"/>
+                <div class='post-caption'>{{ post.caption }}</div>
                 <div class="post-footer">
-                    <div class="footer-left">
-                        <img src='static/images/photogram.png' width="20" height="20" class="like-icon"/>
-                        <p class="like-details">10 Likes</p>
-                    <div class="footer-left">24 Apr 2018</div>
+                    <div class="like-details footer-left">
+                        <i v-if="post.user_liked == True" class="fa fa-heart"></i>
+                        <i v-if="post.user_liked == False" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
+                        {{ post.likes }} Likes
+                    </div>
+                    <div class="alert alert-info" v-if="attemptLike === post.id &&& message !== ''"> {{ message }}</div>
+                    <div class="footer-right">{{ post.created_on }}</div>
                 </div>
 
             </div>                
         </div>
         <div class="sidebar">
-             <button type="submit" class="btn btn-primary new-post-btn">New Post</button>   
+             <button type="submit" class="btn btn-primary new-post-btn" v-on:click="createPost">New Post</button>   
         </div>
     </div>
    `,
     data: function () {
-        return {}
+        return {
+            posts : [],
+            showPosts: 'hide',
+            message: '',
+            attemptLike: ''
+        }
+    },
+    created: function() {
+        let self = this;
+        //self.getPosts();
+        self.userDetails = getUserDetails();
+    },
+    methods: {
+        getPosts: function() {
+            let self = this;
+
+            let userToken = this.getUserToken();
+            let csrfToken = token;
+
+            if (userToken === csrfToken) {
+                router.push('/login');
+            } else {
+                fetch("/api/posts", {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': 'Bearer ' + userToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        router.push('/login');
+                    }
+                })
+                .then(function(jResponse) {
+                    self.posts = jResponse.posts;
+                    self.showPosts =  self.posts !== []? 'show' : 'hide';
+                })
+                .catch(function(err) {
+                    console.log(err);
+                })
+            }
+        },
+        getUserToken: function() {
+            let uToken = localStorage.getIten('token') || token;
+            return uToken;
+        },
+        createPost: function() {
+            router.push('/posts/new');
+        },
+        registerLike: function(postId, postIndex) {
+            let self = this;
+            self.attemptLike = postId;
+
+            let userToken = this.getUserToken();
+            let csrfToken = token;
+
+            if (userToken === csrfToken) {
+                router.push('/login');
+            } else {
+                fetch("/api/posts/" + postId + "/like", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': "Bearer " + userToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.status === 201) {
+                        self.posts[postIndex].likes = self.posts[postIndex].likes + 1;
+                        self.attemptLike = '';
+                        self.message = '';
+                    } else {
+                        return response.json()
+                    }
+                })
+                .then(function(jResponse) {
+                    this.message = jResponse.error;
+                })
+                .catch(function(err) {
+                    console.log(err);
+                });
+            }
+        },
+        goToProfile: function(userId) {
+            router.push('/users/' + userId)
+        }
     }
-})
+});
 
 const CreatePost = Vue.component('post', {
     template: `
         <div>
             <h1>New Post</h1>
             <div class="auth-form-container">
-                <form class="" action="" method="POST">
-                    <div class="form-group d-flex flex-column">
+                <div class="message-container">
+                    <ul class="alert alert-danger" v-if="formValid === 'not_valid'" id="errors">
+                        <li v-for="error in errors"> {{ error }} </li>
+                        </ul>
+                    </div>
+                <form @submit.prevent="createPost" id="newPostForm" class="col-md-12" enctype="mulitpart/form-data">
+                    <div class="form-group">
                         <label class="form-label" for="photoField">Photo</label>
-                        <input type="file" id="photoField" required></input>
-                        <div class="invalid-feedback">This field is required</div>
+                        <input type="file" id="photoField" name="photo"/>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="captionField">Caption</label>
-                        <textarea class="form-control" placeholder="Tell us a little about this picture." id="captionField" rows="4"></textarea>
+                        <textarea class="form-control" placeholder="Tell us a little about this picture." id="captionField" rows="4" name="caption"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="loginBtn">Sumbit</button>
+                    <button type="submit" name="submit" class="btn btn-primary" id="loginBtn">Sumbit</button>
                 </form>
             </div>
         </div>
     `,
     data: function () {
-        return {}
+        return {
+            errors: [],
+            formValid: false
+        }
+    },
+    methods: {
+        getUserToken: function() {
+            let uToken = localStorage.getIten('token') || token;
+            return uToken;
+        },
+        createPost: function() {
+            let userToken = this.getUserToken();
+            let csrfToken = token;
+
+            if (userToken === csrfToken) {
+                router.push('/login');
+            } else {
+
+                let self = this;
+                let userId = 2;
+                let postForm = document.getElementById('newPostForm');
+                let uformdata = new FormData(postForm);
+
+                fetch("/api/users/" + userId + "/posts", {
+                    method: 'POST',
+                    body: uformdata,
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': 'Bearer ' + userToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.status === 200) {
+                        router.push('/explore')
+                    } else {
+                        return response.json(); 
+                    }
+                })
+                .then(function(jResponse) {
+                    self.errors = jResponse.error;
+                    self.formValid = 'not_valid';
+                })
+                .catch(function(err) {
+                    console.log(err);
+                })
+            }
+        }        
     }
-})
+});
 
 const UserProfile = Vue.component('user-profile', {
     template: `
     <div class="full-page-container">
         <div class="profile-head-cotainer">
-            <img src='static/uploads/2.jpg' alt='Profile Photo' style="width:100px; height:100px"/> 
+            <img src='static/profile_photos/2.jpg' alt='Profile Photo' style="width:100px; height:100px"/> 
             <div class="profile-details-container">
                 <div class="title">Rosa Diaz</div>
                 <div class="location">Kingston, Jamaica</div>
@@ -324,28 +471,16 @@ const UserProfile = Vue.component('user-profile', {
         </div>
         <div class="posts-container col-md-3">
             <div class="no-posts">This user hasn't posted anything yet.</div>
-                <img src='static/images/uploads/2.jpg' width="250" height="250" />   
-                <img src='static/images/uploads/2.jpg' width="250" height="250" /> 
-                <img src='static/images/uploads/2.jpg' width="250" height="250" />
-                <img src='static/images/uploads/2.jpg' width="250" height="250" />
-                <img src='static/images/uploads/2.jpg' width="250" height="250" />
-                <img src='static/images/uploads/2.jpg' width="250" height="250"/>
+                <img src='static/images/posts/2.jpg' width="250" height="250" />   
+                <img src='static/images/posts/2.jpg' width="250" height="250" /> 
+                <img src='static/images/posts/2.jpg' width="250" height="250" />
+                <img src='static/images/posts/2.jpg' width="250" height="250" />
+                <img src='static/images/posts/2.jpg' width="250" height="250" />
+                <img src='static/images/posts/2.jpg' width="250" height="250"/>
         </div>
         </div>
-    `,
-    data: function () {
-        return {
-            profilePhotoSource: require("../imauploads/2.jpg")
-        }
-    },
-    methods: {
-        getProfilePhotoUrl() {
-            var imageUrl = require("static/images/uploads/2.jpg")
-            return imageUrl;
-        }
-    },
-    props: ['profilePhotoSource']
-})
+    `
+});
 
 
 // Define Routes

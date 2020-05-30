@@ -4,8 +4,8 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
-import os, datetime
-from app import app, db, upload_folder
+import os, datetime, uuid
+from app import app, db, posts_folder, profile_photo_folder
 from flask import render_template, request,redirect, url_for, flash,abort, jsonify,g
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
@@ -63,7 +63,13 @@ def userRegister():
         location = userRegistrationForm.location.data
         biography = userRegistrationForm.biography.data
         profile_photo = userRegistrationForm.profile_photo.data
-        profile_photo_name = secure_filename(profile_photo.filename)
+
+        fileuid = str(uuid.uuid4())
+        oldfilename = profile_photo.filename
+        ext = oldfilename.split(".")[1]
+        profile_photo_name = (fileuid + oldfilename + "." + ext).replace('-', '_')
+        profile_photo_name = secure_filename(profile_photo_name)
+
         if(password != confirmed_password): 
             success = False
             submission_errors.append("password and confirm passowrd is different")
@@ -77,7 +83,7 @@ def userRegister():
         #print("success", success)
         if(success == True):
             profile_photo.save(os.path.join(
-                upload_folder, profile_photo_name
+                profile_photo_folder, profile_photo_name
             ))
             user = Users(username,password,firstname,lastname, email, location, biography, profile_photo_name,datetime.datetime.now())
             db.session.add(user)
@@ -91,7 +97,7 @@ def userRegister():
 # user login endpoint
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    loginForm = LoginForm() #(csrf_enabled=False)
+    loginForm = LoginForm() 
     submission_errors = []
 
     if request.method == 'POST' and loginForm.validate_on_submit():
@@ -103,7 +109,7 @@ def login():
             # and generate the user token
             payload = {"userid":user.id,"time":datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
             token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-            return successResponse({'message':username+"User successfully logged in.", token: token}),200
+            return successResponse({'message': username+" User successfully logged in.", "token": token}),200
         # Add user validation error
         submission_errors.append("username or password invallid")
 
@@ -132,14 +138,7 @@ def getUserDetail(user_id):
         posted_items = []
         if(len(posts) > 0):
             for post in posts:
-                item = {
-                    "id":post.id,
-                    "user_id":post.user_id,
-                    "photo": post.photo,
-                    "caption": post.caption,
-                    "created_on":post.created_on.strftime("%m/%d/%Y, %H:%M:%S")
-                }
-                posted_items.append(item)
+                posted_items.append(getPostDetails(post))
 
         # Order user data
         userDetail = {
@@ -202,17 +201,32 @@ def getUserPosts(user_id):
         posted_items = []
         if(len(posts) > 0):
             for post in posts:
-                item = {
-                    "id":post.id,
-                    "user_id":post.user_id,
-                    "photo": post.photo,
-                    "caption": post.caption,
-                    "created_on":post.created_on.strftime("%m/%d/%Y, %H:%M:%S")
-                }
-                posted_items.append(item)
+                posted_items.append(getPostDetails(post))
+            
         return successResponse({"posts":posted_items})
     submission_errors.append("user id invalid")
     return errorResponse(submission_errors),400
+
+def getPostDetails(post):
+    userDet = Users.query.filter(Users.user_id == post.user_id).first()
+    user_name = userDet.username
+    user_photo = userDet.profile_photo
+    likes = Likes.query.filter_by(Likes.post_id == post.id).count()
+    user_like = Likes.query.filter_by(Likes.user_id == post.user_id, Likes.post_id == post.id).first()
+    user_liked = False
+    print("user likes", user_like)
+    item = {
+        "id": post.id,
+        "user_id": post.user_id,
+        "user_name": user_name,
+        "user_photo": user_photo,
+        "photo": post.photo,
+        "caption": post.caption,
+        "likes": likes,
+        "user_liked": user_liked,
+        "created_on":post.created_on.strftime("%m/%d/%Y, %H:%M:%S")
+    }
+    return item   
 
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @requires_auth
@@ -251,7 +265,7 @@ def getFollowerCount(user_id):
     if(not user is None ):
         follows = Follows.query.filter(Follows.user_id == user_id).all()
         followCount = len(follows)
-        return successResponse({"followers": followCount}),201
+        return successResponse({"followers": followCount}),200
     submission_errors.append("user id invalid")
     return errorResponse(submission_errors),400
 
@@ -259,19 +273,12 @@ def getFollowerCount(user_id):
 @app.route('/api/posts', methods=['GET'])
 @requires_auth
 def getAllPosts():
-    posts = Posts.query.order_by(Posts.user_id).all()
+    posts = Posts.query.order_by(Posts.created_on.desc()).all()
     posted_items = []
     if(len(posts) > 0):
         for post in posts:
-            item = {
-                "id":post.id,
-                "user_id":post.user_id,
-                "photo": post.photo,
-                "caption": post.caption,
-                "created_on":post.created_on.strftime("%m/%d/%Y, %H:%M:%S")
-            }
-            posted_items.append(item)
-    return successResponse({"posts":posted_items}),201
+            posted_items.append(getPostDetails(post))
+    return successResponse({"posts": posted_items}),200
     
 
 @app.route('/api/posts/<post_id>/like', methods=['POST'])

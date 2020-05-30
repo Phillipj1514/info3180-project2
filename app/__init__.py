@@ -4,8 +4,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'v\xf9\xf7\x11\x13\x18\xfaMYp\xed_\xe8\xc9w\x06\x8e\xf0f\xd2\xba\xfd\x8c\xda'
-app.config['UPLOAD_FOLDER'] = './app/static/images/uploads'
-upload_folder = app.config['UPLOAD_FOLDER']
+app.config['PROFILE_PHOTO_FOLDER'] = './app/static/images/profile_photos'
+app.config['POSTS_FOLDER'] = './app/static/images/posts'
+profile_photo_folder = app.config['PROFILE_PHOTO_FOLDER']
+posts_folder = app.config['POSTS_FOLDER']
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://project2:project2@localhost/project2"
