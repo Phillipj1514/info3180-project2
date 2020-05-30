@@ -295,6 +295,7 @@ const Feed = Vue.component('feed', {
 
             let userToken = self.getUserToken();
             let csrfToken = '';
+            
             try{
                 csrfToken = token;
             } catch {
