@@ -93,6 +93,7 @@ def userRegister():
 def login():
     loginForm = LoginForm() #(csrf_enabled=False)
     submission_errors = []
+
     if request.method == 'POST' and loginForm.validate_on_submit():
         username = loginForm.username.data
         password = loginForm.password.data
@@ -102,10 +103,12 @@ def login():
             # and generate the user token
             payload = {"userid":user.id,"time":datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
             token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-            return successResponse({'message':username+"User successfully logged in.", token: token})
+            return successResponse({'message':username+"User successfully logged in.", token: token}),200
         # Add user validation error
         submission_errors.append("username or password invallid")
-    return errorResponse(form_errors(loginForm)+submission_errors)
+
+    return errorResponse(form_errors(loginForm)+submission_errors),403
+
 
 # User logout endpoint
 @app.route('/api/auth/logout', methods=['GET'])

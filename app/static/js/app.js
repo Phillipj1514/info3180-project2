@@ -64,12 +64,10 @@ const Home = Vue.component('home', {
        return {}
     },
     methods: {
-        onClickRegister: function (event) {
-            const router = this.$router;
+        onClickRegister: function () {
             router.push("/register")
         },
-        onClickLogin: function (event) {
-            const router = this.$router;
+        onClickLogin: function () {
             router.push("/login")
         }
     }
@@ -142,7 +140,6 @@ const Register = Vue.component('register', {
     `,
     data: function () {
         return {
-            message: '',
             errors: [],
             formValid: false
         }
@@ -152,7 +149,7 @@ const Register = Vue.component('register', {
             let self = this;
             let regForm = document.getElementById('registrationForm');
             var uformdata = new FormData(regForm);
-            console.log(uformdata.get("email"));
+        
             fetch("/api/users/register", {
                 method: 'POST',
                 body: uformdata,
@@ -182,7 +179,7 @@ const Register = Vue.component('register', {
 
 
 const Login = Vue.component('login', {
-    template: `
+    template: ` 
         <div class="container regular">
             <h1>Login</h1>
             <div class="auth-form-container">
@@ -191,18 +188,18 @@ const Login = Vue.component('login', {
                     <li v-for="error in errors"> {{ error }} </li>
                 </ul>
             </div>
-                <form @submit.prevent="onLogin" id="loginForm" class="login-form">
-                    <div class="form-group">
-                        <label class="form-label" for="usernameField">Username</label>
-                        <input type="text" id="usernameField" name="username" class="form-control"/>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="passwordField">Password</label>
-                        <input type="password" id="passwordField" name="password" class="form-control"/>
-                    </div>
-                    <br/>
-                    <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
-                </form>
+            <form @submit.prevent="onLogin" enctype="mutipart/form-data" id="loginForm" class="login-form col-md-12">
+                <div class="form-group">
+                    <label class="form-label" for="usernameField">Username</label>
+                    <input type="text" id="usernameField" name="username" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="passwordField">Password</label>
+                    <input type="password" id="passwordField" name="password" class="form-control"/>
+                </div>
+                <br/>
+                <button type="submit" name="submit" class="btn btn-primary" id="loginBtn">Login</button>
+            </form>
         </div>
     </div>
     `,
@@ -215,15 +212,14 @@ const Login = Vue.component('login', {
     methods: {
         onLogin: function() {
             let self = this;
-            let form = document.getElementById('loginForm');
-            let uformdata = new FormData(form);
-            let token = localStorage.getItem('token');
+            let lForm = document.getElementById('loginForm');
+            let lformdata = new FormData(lForm);
+            console.log(lformdata.get("username"));
 
-            fetch("/api/auth/login"), {
+            fetch('/api/auth/login', {
                 method: 'POST',
-                body: uformdata,
+                body: lformdata,
                 headers: {
-                    'Content-Type': 'multipart/form-data',
                     'X-CSRFToken': token,
                     'Authorization': 'Bearer ' + token
                 }
@@ -232,11 +228,19 @@ const Login = Vue.component('login', {
                 return response.json();
             })
             .then(function(jResponse) {
-                //if jResponse.has
-            });
+                if (jResponse.hasOwnProperty("message")) {
+                    router.push('/explore');
+                } else {
+                    self.errors = jResponse.error;
+                    self.formValid = 'not_valid';
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+            });  
         }
     }
-})
+});
 
 const Feed = Vue.component('feed', {
     template: `
