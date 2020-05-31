@@ -198,3 +198,9 @@ footer {
 ul {
     list-style-type: none;
 }
+
+.fa-heart, .fa-heart-o {
+    width: 30px;
+    height: 30px;
+    
+}

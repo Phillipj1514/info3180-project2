@@ -248,25 +248,28 @@ const Login = Vue.component('login', {
     }
 });
 
+
 const Feed = Vue.component('feed', {
     template: `
     <div class="container feed-page">
-        <div class="no-content alert alert-info" v-if="showPosts == 'show'">There are no posts to show yet. Go create a post!</div>
-        <div class="feed-posts" v-for="(index, post) in posts">
-            <div class="post card">
+        <div class="no-content alert alert-info" v-if="showPosts === 'show'">There are no posts to show yet. Go create a post!</div>
+        <div class="feed-posts">
+            <div class="post card" v-for="(post,index) in posts">
                 <div class="post-header">
-                    <img v-bind:src="'app/static/images/profile_photos/' + post.user_photo" height="30" width="30" class="img img-responsive img-circle" />
-                    <div class="poster" v-on:click="goToProfile(post.user_id)">{{ post.user_name }}</div>                        
+                    <img height="30" width="30" v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
+                    <div class="poster" v-on:click="goToProfile(post.user_id)"> {{ post.user_name }} </div>                        
                 </div>
-                <img class="post-image img-responsive img" v-bind:src="'app/static/images/posts/' + post.photo" width="500" height="500"/>
+                <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo" width="450" height="450"/>
                 <div class='post-caption'>{{ post.caption }}</div>
                 <div class="post-footer">
                     <div class="like-details footer-left">
-                        <i v-if="post.user_liked == true" class="fa fa-heart"></i>
-                        <i v-if="post.user_liked == false" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
-                        {{ post.likes }} Likes
+                        <i v-if="post.user_liked === true" class="fa fa-heart"></i>
+                        <i v-if="post.user_liked === false" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
+                        {{ post.likes }}
+                        <p class="like-text" v-if="(post.likes === 0) && (post.likes > 1)">Likes</p>
+                        <p class="like-text" v-if="(post.likes === 1)">Like</p>
                     </div>
-                    <div class="alert alert-info" v-if="attemptLike === post.id && message !== ''"> {{ message }}</div>
+                    <div class="alert alert-info" v-if="(attemptLike === post.id) && (message !== '')"> {{ message }}</div>
                     <div class="footer-right">{{ post.created_on }}</div>
                 </div>
 
@@ -295,7 +298,7 @@ const Feed = Vue.component('feed', {
 
             let userToken = self.getUserToken();
             let csrfToken = '';
-            
+
             try{
                 csrfToken = token;
             } catch {
@@ -323,6 +326,9 @@ const Feed = Vue.component('feed', {
                     self.posts = jResponse.posts;
                     console.log(self.posts);
                     self.showPosts =  self.posts !== []? 'show' : 'hide';
+                    self.posts.forEach(element => {
+                        console.log(element.user_photo);
+                    });
                 })
                 .catch(function(err) {
                     console.log(err);
@@ -356,6 +362,7 @@ const Feed = Vue.component('feed', {
                 .then(function(response) {
                     if (response.status === 201) {
                         self.posts[postIndex].likes = self.posts[postIndex].likes + 1;
+                        self.posts[postIndex].user_liked = true;
                         self.attemptLike = '';
                         self.message = '';
                     } else {
