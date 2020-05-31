@@ -467,12 +467,12 @@ const UserProfile = Vue.component('user-profile', {
     template: `
     <div class="full-page-container">
         <div class="profile-head-cotainer">
-            <img src='static/profile_photos/2.jpg' alt='Profile Photo' style="width:100px; height:100px"/> 
+            <img src='../static/images/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' alt='Profile Photo' style="width:100px; height:100px;"/> 
             <div class="profile-details-container">
                 <div class="title">Rosa Diaz</div>
                 <div class="location">Kingston, Jamaica</div>
                 <div class="member-details">Member since January 2018</div>
-                <div class="biography-details">THis is my short biography so you can learn more about me</div>
+                <div class="biography-details">This is my short biography so you can learn more about me</div>
             </div>
             <div class="engagement-container">
                 <div class="stats">
@@ -490,12 +490,12 @@ const UserProfile = Vue.component('user-profile', {
         </div>
         <div class="posts-container col-md-3">
             <div class="no-posts">This user hasn't posted anything yet.</div>
-                <img src='static/images/posts/2.jpg' width="250" height="250" />   
-                <img src='static/images/posts/2.jpg' width="250" height="250" /> 
-                <img src='static/images/posts/2.jpg' width="250" height="250" />
-                <img src='static/images/posts/2.jpg' width="250" height="250" />
-                <img src='static/images/posts/2.jpg' width="250" height="250" />
-                <img src='static/images/posts/2.jpg' width="250" height="250"/>
+                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" />   
+                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" /> 
+                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" />
+                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" />
+                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" />
+                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250"/>
         </div>
         </div>
     `
@@ -511,7 +511,7 @@ const router = new VueRouter({
         { path: "/login", component: Login },
         { path: "/logout", component: Home },
         { path: "/explore", component: Feed },
-        { path: "/users/", component: UserProfile },
+        { path: "/users/:user_id", component: UserProfile },
         { path: "/posts/new", component: CreatePost },
         {path: "*", component: NotFound }
     ]
