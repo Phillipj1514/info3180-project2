@@ -81,7 +81,6 @@ def userRegister():
             success = False
             submission_errors.append("email already used")
         # Save the data if the information entered is valid and new 
-        #print("success", success)
         if(success == True):
             profile_photo.save(os.path.join(
                 profile_photo_folder, profile_photo_name
@@ -91,7 +90,6 @@ def userRegister():
             db.session.commit()
             return successResponse({"message": "User successfully registered"}),201
     # If the form fail to submit it returns an error message
-    #print(userRegistrationForm.firstname.data)
     errors = errorResponse(form_errors(userRegistrationForm)+submission_errors)
     return errors,400
 
@@ -154,8 +152,8 @@ def getUserDetail(user_id):
             "email": user.email,
             "location": user.location,
             "biography": user.biography,
-            "profile_photo": user.profile_photo,
-            "joined_on": user.joined_on.strftime("%m/%d/%Y, %H:%M:%S"),
+            "photo": user.profile_photo,
+            "joined_on": user.joined_on.strftime("%m/%Y"),
             "posts":posted_items
         }
         return successResponse(userDetail)
@@ -221,7 +219,6 @@ def getUserPosts(user_id):
 
 def getPostDetails(post):
     userDet = Users.query.filter(Users.id == post.user_id).first()
-    print(userDet)
     user_name = userDet.username
     user_photo = userDet.profile_photo
     likes = Likes.query.filter(Likes.post_id == post.id).count()
@@ -231,7 +228,6 @@ def getPostDetails(post):
     if (not user_like is None):
         user_liked = True
 
-    print("user likes", user_like)
     item = {
         "id": post.id,
         "user_id": post.user_id,

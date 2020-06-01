@@ -360,17 +360,17 @@ const Feed = Vue.component('feed', {
                     }
                 })
                 .then(function(response) {
-                    if (response.status === 201) {
-                        self.posts[postIndex].likes = self.posts[postIndex].likes + 1;
+                    return response.json();
+                })
+                .then(function(jResponse) {
+                    if (jResponse.hasOwnProperty("message")) {
+                        self.posts[postIndex].likes = jResponse.likes;
                         self.posts[postIndex].user_liked = true;
                         self.attemptLike = '';
                         self.message = '';
-                    } else {
-                        return response.json()
+                    }else {
+                        this.message = jResponse.error;
                     }
-                })
-                .then(function(jResponse) {
-                    this.message = jResponse.error;
                 })
                 .catch(function(err) {
                     console.log(err);
@@ -467,35 +467,50 @@ const UserProfile = Vue.component('user-profile', {
     template: `
     <div class="full-page-container">
         <div class="profile-head-cotainer">
-            <img src='../static/images/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' alt='Profile Photo' style="width:100px; height:100px;"/> 
+            <img src="'../static/images/profile_photos/' + userDetails.photo" alt='Profile Photo' style="width:100px; height:100px;"/> 
             <div class="profile-details-container">
-                <div class="title">Rosa Diaz</div>
-                <div class="location">Kingston, Jamaica</div>
-                <div class="member-details">Member since January 2018</div>
-                <div class="biography-details">This is my short biography so you can learn more about me</div>
+                <div class="title"> {{ userDetails.firstname }} {{ userDetails.lastname }} </div>
+                <div class="location"> {{ userDetails.location }} </div>
+                <div class="member-details">Member since {{ userDetails.joined_on }} </div>
+                <div class="biography-details"> {{ userDetails.biograhy }} </div>
             </div>
             <div class="engagement-container">
                 <div class="stats">
                     <div class="stat">
-                        <div class="stat-value">6</div>
+                        <div class="stat-value"> {{ postCount }} </div>
                         <div class="stat-label">Posts</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-value">10</div>
+                        <div class="stat-value"> {{ followers }} </div>
                         <div class="stat-label">Followers</div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary follow-btn">Follow</button>
+                <button type="submit" class="btn btn-success follow-btn" v-if="(!myProfile) && user_follow">Following</button>
+                <button type="submit" class="btn btn-primary follow-btn" v-if="(!myProfile) && (!user_follow)">Follow</button>
             </div>
         </div>
         <div class="posts-container col-md-3">
-            <div class="no-posts">This user hasn't posted anything yet.</div>
-                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" />   
-                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" /> 
-                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" />
-                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" />
-                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250" />
-                <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250"/>
+            <div v-if="posts === []" class="no-posts">This user hasn't posted anything yet.</div>
+            <div class="post card" v-for="(post,index) in posts">
+                <div class="post-header">
+                    <img height="30" width="30" v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
+                    <div class="poster"> {{ post.user_name }} </div>                        
+                </div>
+                <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo" width="450" height="450"/>
+                <div class='post-caption'>{{ post.caption }}</div>
+                <div class="post-footer">
+                    <div class="like-details footer-left">
+                        <i v-if="post.user_liked === true" class="fa fa-heart"></i>
+                        <i v-if="post.user_liked === false" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
+                        {{ post.likes }}
+                        <p class="like-text" v-if="(post.likes === 0) && (post.likes > 1)">Likes</p>
+                        <p class="like-text" v-if="(post.likes === 1) ">Like</p>
+                    </div>
+                    <div class="alert alert-info" v-if="(attemptLike === post.id) && (message !== '')"> {{ message }}</div>
+                    <div class="footer-right">{{ post.created_on }}</div>
+                </div>
+
+            </div>                
         </div>
         </div>
     `,
@@ -503,24 +518,120 @@ const UserProfile = Vue.component('user-profile', {
         return {
             posts: [],
             message: '',
-            userdetails: {},
-            attemptLike: ''
+            userDetails: {},
+            attemptLike: '',
+            myProfile: false,
+            followers: 0,
+            postCount: 0,
+            user_follow: true
         }
     },
+    created: function() {
+        let uId = this.$route.params.user_id;
+        this.getProfilePosts(uId);
+        this.getUserDetails(uId);
+        this.getFollowerCount(uId);
+    },
     methods: {
-        getUserPosts: function() {
+        getProfilePosts: function(userId) {
             let self = this;
             
             let userToken = this.getUserToken();
             let csrfToken = token;
-            let userId = localStorage.getItem("userId");
 
             if (userToken === csrfToken) {
                 router.push('/login');
             } else {
                 fetch("/api/users/" + userId + "/posts", {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': 'Bearer ' + userToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.status !== 200) {
+                        console.log(response.status, response.statusText);
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(function(jResponse) {
+                    self.posts = jResponse.posts;
+                    console.log(self.posts);
+                    self.postCount = self.posts.length;
+                })
+                .catch(function(error) {
+                    console.log(err);
+                })
+            }
+        },
+        getUserDetails:  function(userId) {
+            let self = this;
+            
+            let userToken = this.getUserToken();
+            let csrfToken = token;
+            let localUId = localStorage.getItem("userId");
 
-                }) 
+            if (localUId === userId) {
+                self.myProfile = true;
+            }
+
+
+            if (userToken === csrfToken) {
+                router.push('/login');
+            } else {
+                fetch("/api/users/" + userId , {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': 'Bearer ' + userToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.status !== 200) {
+                        console.log(response.status, response.statusText);
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(function(jResponse) {
+                    self.userDetails = jResponse.userDetail;
+                })
+                .catch(function(error) {
+                    console.log(err);
+                })
+            }
+        },
+        getFollowerCount:  function(userId) {
+            let self = this;
+            
+            let userToken = this.getUserToken();
+            let csrfToken = token;
+
+            if (userToken === csrfToken) {
+                router.push('/login');
+            } else {
+                fetch("/api/users/" + userId + "/follow" , {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': 'Bearer ' + userToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.status !== 200) {
+                        console.log(response.status, response.statusText);
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(function(jResponse) {
+                    self.followers = jResponse.followers;
+                })
+                .catch(function(error) {
+                    console.log(err);
+                })
             }
         },
         registerLike: function(postId, postIndex) {
@@ -541,26 +652,27 @@ const UserProfile = Vue.component('user-profile', {
                     }
                 })
                 .then(function(response) {
-                    if (response.status === 201) {
-                        self.posts[postIndex].likes = self.posts[postIndex].likes + 1;
+                    return response.json();
+                })
+                .then(function(jResponse) {
+                    if (jResponse.hasOwnProperty("message")) {
+                        self.posts[postIndex].likes = jResponse.likes;
                         self.posts[postIndex].user_liked = true;
                         self.attemptLike = '';
                         self.message = '';
-                    } else {
-                        return response.json()
+                    }else {
+                        this.message = jResponse.error;
                     }
-                })
-                .then(function(jResponse) {
-                    this.message = jResponse.error;
                 })
                 .catch(function(err) {
                     console.log(err);
                 });
             }
         },
-        goToProfile: function(userId) {
-            router.push('/users/' + userId)
-        }       
+        getUserToken: function() {
+            let uToken = localStorage.getItem('token') || token;
+            return uToken;
+        },
     }
 });
 
