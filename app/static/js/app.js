@@ -498,7 +498,70 @@ const UserProfile = Vue.component('user-profile', {
                 <img src='../static/profile_photos/88eaf2c2_9da7_4f78_949e_16ca71ae7b431.png' width="250" height="250"/>
         </div>
         </div>
-    `
+    `,
+    data: function() {
+        return {
+            posts: [],
+            message: '',
+            userdetails: {},
+            attemptLike: ''
+        }
+    },
+    methods: {
+        getUserPosts: function() {
+            let self = this;
+            
+            let userToken = this.getUserToken();
+            let csrfToken = token;
+            let userId = localStorage.getItem("userId");
+
+            if (userToken === csrfToken) {
+                router.push('/login');
+            } else {
+                fetch("/api/users/" + userId + "/posts", {
+
+                }) 
+            }
+        },
+        registerLike: function(postId, postIndex) {
+            let self = this;
+            self.attemptLike = postId;
+
+            let userToken = this.getUserToken();
+            let csrfToken = token;
+
+            if (userToken === csrfToken) {
+                router.push('/login');
+            } else {
+                fetch("/api/posts/" + postId + "/like", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': "Bearer " + userToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.status === 201) {
+                        self.posts[postIndex].likes = self.posts[postIndex].likes + 1;
+                        self.posts[postIndex].user_liked = true;
+                        self.attemptLike = '';
+                        self.message = '';
+                    } else {
+                        return response.json()
+                    }
+                })
+                .then(function(jResponse) {
+                    this.message = jResponse.error;
+                })
+                .catch(function(err) {
+                    console.log(err);
+                });
+            }
+        },
+        goToProfile: function(userId) {
+            router.push('/users/' + userId)
+        }       
+    }
 });
 
 
