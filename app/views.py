@@ -138,7 +138,7 @@ def getUserDetail(user_id):
     submission_errors = []
     if(not user is None ):
         followed = Follows.query.filter(Follows.follower_id == user.id).filter(Follows.user_id == user_id).first()
-        
+
         user_follow = False
         if (not followed is None):
             user_follow = True
@@ -154,7 +154,7 @@ def getUserDetail(user_id):
             "biography": user.biography,
             "photo": user.profile_photo,
             "joined_on": user.joined_on.strftime("%B, %Y"),
-            "user_follow": user_followed
+            "user_follow": user_follow
         }
         return successResponse(userDetail)
     submission_errors.append("user id invalid")
@@ -244,7 +244,7 @@ def getPostDetails(post):
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @requires_auth
 def createUserFollow(user_id):
-    addFollowForm = AddFollowForm(csrf_enabled=False)
+    addFollowForm = AddFollowForm()
     submission_errors = []
     if request.method == 'POST' and addFollowForm.validate_on_submit():
         userId = addFollowForm.user_id.data

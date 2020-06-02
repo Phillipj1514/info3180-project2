@@ -486,7 +486,7 @@ const UserProfile = Vue.component('user-profile', {
                     </div>
                 </div>
                 <button type="submit" class="btn btn-success follow-btn" v-if="(!myProfile) && userDetails.user_follow">Following</button>
-                <button type="submit" class="btn btn-primary follow-btn" v-on:click="followUser()" v-if="(!myProfile) && (!userDetails.user_follow)">Follow</button>
+                <button type="submit" class="btn btn-primary follow-btn" v-on:click="followUser" v-if="(!myProfile) && (!userDetails.user_follow)">Follow</button>
             </div>
         </div>
         <div v-if="posts === []" class="no-posts">This user hasn't posted anything yet.</div>
@@ -610,6 +610,44 @@ const UserProfile = Vue.component('user-profile', {
                 })
                 .then(function(jResponse) {
                     self.followers = jResponse.followers;
+                })
+                .catch(function(error) {
+                    console.log(err);
+                })
+            }
+        },
+        followUser:  function() {
+            let self = this;
+            
+            let userToken = this.getUserToken();
+            let csrfToken = token;
+            let userId = localStorage.getItem('userId');
+
+            let uformdata = new FormData();
+            uformdata.append("user_id", this.$route.params.user_id);
+            uformdata.append("follower_id", userId);
+
+            if (userToken === csrfToken) {
+                router.push('/login');
+            } else {
+                fetch("/api/users/" + userId + "/follow" , {
+                    method: 'POST',
+                    body: uformdata,
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Authorization': 'Bearer ' + userToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.status !== 201) {
+                        return response.json();
+                    } else {
+                        self.userDetails.user_follow = true;
+                        self.followers = self.followers + 1;
+                    }  
+                })
+                .then(function(jResponse) {
+                    console.log(jResponse.error);
                 })
                 .catch(function(error) {
                     console.log(err);
