@@ -137,6 +137,11 @@ def getUserDetail(user_id):
     # check to ensure user id is present
     submission_errors = []
     if(not user is None ):
+        followed = Follows.query.filter(Follows.follower_id == user.id).filter(Follows.user_id == user_id).first()
+        
+        user_follow = False
+        if (not followed is None):
+            user_follow = True
 
         # Order user data
         userDetail = {
@@ -148,7 +153,8 @@ def getUserDetail(user_id):
             "location": user.location,
             "biography": user.biography,
             "photo": user.profile_photo,
-            "joined_on": user.joined_on.strftime("%B, %Y")
+            "joined_on": user.joined_on.strftime("%B, %Y"),
+            "user_follow": user_followed
         }
         return successResponse(userDetail)
     submission_errors.append("user id invalid")

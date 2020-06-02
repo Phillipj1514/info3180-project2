@@ -485,31 +485,13 @@ const UserProfile = Vue.component('user-profile', {
                         <div class="stat-label">Followers</div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-success follow-btn" v-if="(!myProfile) && user_follow">Following</button>
-                <button type="submit" class="btn btn-primary follow-btn" v-if="(!myProfile) && (!user_follow)">Follow</button>
+                <button type="submit" class="btn btn-success follow-btn" v-if="(!myProfile) && userDetails.user_follow">Following</button>
+                <button type="submit" class="btn btn-primary follow-btn" v-on:click="followUser()" v-if="(!myProfile) && (!userDetails.user_follow)">Follow</button>
             </div>
         </div>
+        <div v-if="posts === []" class="no-posts">This user hasn't posted anything yet.</div>
         <div class="posts-container col-md-3">
-            <div v-if="posts === []" class="no-posts">This user hasn't posted anything yet.</div>
-            <div class="post card" v-for="(post,index) in posts">
-                <div class="post-header">
-                    <img v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
-                    <div class="poster"> {{ post.user_name }} </div>                        
-                </div>
-                <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo"/>
-                <div class='post-caption'>{{ post.caption }}</div>
-                <div class="post-footer">
-                    <div class="like-details footer-left">
-                        <i v-if="post.user_liked === true" class="fa fa-heart"></i>
-                        <i v-if="post.user_liked === false" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
-                        {{ post.likes }}
-                        <p class="like-text" v-if="(post.likes === 0) && (post.likes > 1)">Likes</p>
-                        <p class="like-text" v-if="(post.likes === 1) ">Like</p>
-                    </div>
-                    <div class="alert alert-info" v-if="(attemptLike === post.id) && (message !== '')"> {{ message }}</div>
-                    <div class="footer-right">{{ post.created_on }}</div>
-                </div>
-
+                <img class="post-image img-responsive img"  v-for="(post,index) in posts" v-bind:src="'../static/images/posts/' + post.photo"/>
             </div>                
         </div>
         </div>
@@ -523,7 +505,6 @@ const UserProfile = Vue.component('user-profile', {
             myProfile: false,
             followers: 0,
             postCount: 0,
-            user_follow: true
         }
     },
     created: function() {
