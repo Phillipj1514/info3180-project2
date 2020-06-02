@@ -256,10 +256,10 @@ const Feed = Vue.component('feed', {
         <div class="feed-posts">
             <div class="post card" v-for="(post,index) in posts">
                 <div class="post-header">
-                    <img height="30" width="30" v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
+                    <img v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
                     <div class="poster" v-on:click="goToProfile(post.user_id)"> {{ post.user_name }} </div>                        
                 </div>
-                <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo" width="450" height="450"/>
+                <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo"/>
                 <div class='post-caption'>{{ post.caption }}</div>
                 <div class="post-footer">
                     <div class="like-details footer-left">
@@ -467,7 +467,7 @@ const UserProfile = Vue.component('user-profile', {
     template: `
     <div class="container regular">
         <div class="profile-head-cotainer">
-            <img src="'../static/images/profile_photos/' + userDetails.photo" alt='Profile Photo' style="width:100px; height:100px;"/> 
+            <img v-bind:src="'../static/images/profile_photos/' + userDetails.photo" alt='Profile Photo'/> 
             <div class="profile-details-container">
                 <div class="title"> {{ userDetails.firstname }} {{ userDetails.lastname }} </div>
                 <div class="location"> {{ userDetails.location }} </div>
@@ -493,10 +493,10 @@ const UserProfile = Vue.component('user-profile', {
             <div v-if="posts === []" class="no-posts">This user hasn't posted anything yet.</div>
             <div class="post card" v-for="(post,index) in posts">
                 <div class="post-header">
-                    <img height="30" width="30" v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
+                    <img v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
                     <div class="poster"> {{ post.user_name }} </div>                        
                 </div>
-                <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo" width="450" height="450"/>
+                <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo"/>
                 <div class='post-caption'>{{ post.caption }}</div>
                 <div class="post-footer">
                     <div class="like-details footer-left">
