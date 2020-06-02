@@ -11,16 +11,28 @@ Vue.component('app-header', {
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
+            <router-link class="nav-link" to="/">
+                Home
+                <span class="sr-only">(current)</span>
+            </router-link>
           </li>  
           <li class="nav-item active">
-            <router-link class="nav-link" to="/explore">Explore <span class="sr-only">(current)</span></router-link>
+            <div class="nav-link" v-on:click="goToFeed">
+                Explore
+                <span class="sr-only">(current)</span>
+            </div>
           </li>  
           <li class="nav-item active">
-            <div class="nav-link" v-on:click="goToProfile">My Profile<span class="sr-only">(current)</span></div>
+            <div class="nav-link" v-on:click="goToProfile">
+                My Profile
+                <span class="sr-only">(current)</span>
+            </div>
           </li>  
           <li class="nav-item active">
-            <div class="nav-link" v-on:click="logout">Logout<span class="sr-only">(current)</span></router-link></div>
+            <div class="nav-link" v-on:click="logout">
+                Logout
+                <span class="sr-only">(current)</span>
+            </div>
           </li>  
         </ul>
       </div>
@@ -32,6 +44,15 @@ Vue.component('app-header', {
             try {
                 userId = localStorage.getItem("userId");
                 router.push('/users/' + userId);
+            } catch  {
+                router.push('/login');
+            }
+        },
+        goToFeed: function() {
+            let userId;
+            try {
+                token = localStorage.getItem("token");
+                router.push('/explore');
             } catch  {
                 router.push("/login");
             }
@@ -55,6 +76,8 @@ Vue.component('app-header', {
             })
             .then(function(response) {
                 if (response.status === 200) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('userId');
                     router.push('/');
                 } 
                 return response.json;
@@ -651,9 +674,10 @@ const UserProfile = Vue.component('user-profile', {
                     }
                 })
                 .then(function(jResponse) {
-                    self.followers = jResponse.followers;
+                    console.log("jResponse");
+                    self.followers = jResponse;
                 })
-                .catch(function(error) {
+                .catch(function(err) {
                     console.log(err);
                 })
             }
@@ -668,6 +692,7 @@ const UserProfile = Vue.component('user-profile', {
             let uformdata = new FormData();
             uformdata.append("user_id", this.$route.params.user_id);
             uformdata.append("follower_id", userId);
+            
 
             if (userToken === csrfToken) {
                 router.push('/login');
@@ -681,17 +706,18 @@ const UserProfile = Vue.component('user-profile', {
                     }
                 })
                 .then(function(response) {
-                    if (response.status !== 201) {
-                        return response.json();
-                    } else {
+                    if (response.status === 201) {        
                         self.userDetails.user_follow = true;
                         self.followers = self.followers + 1;
-                    }  
+                    }
+                    return response.json();
                 })
                 .then(function(jResponse) {
-                    console.log(jResponse.error);
+                    if (jResponse.hasOwnProperty("error")) {
+                        console.log(jResponse.error);
+                    }
                 })
-                .catch(function(error) {
+                .catch(function(err) {
                     console.log(err);
                 })
             }

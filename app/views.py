@@ -140,6 +140,9 @@ def getUserDetail(user_id):
         followed = Follows.query.filter(Follows.follower_id == user.id).filter(Follows.user_id == user_id).first()
 
         user_follow = False
+        print(user_follow)
+        print(followed)
+
         if (not followed is None):
             user_follow = True
 
@@ -246,14 +249,20 @@ def getPostDetails(post):
 def createUserFollow(user_id):
     addFollowForm = AddFollowForm()
     submission_errors = []
+
     if request.method == 'POST' and addFollowForm.validate_on_submit():
         userId = addFollowForm.user_id.data
         follower_id = addFollowForm.follower_id.data
+
         # Check to ensure the user id entered is an integer
         if ((not isinstance(user_id, int) and not user_id.isnumeric()) or 
-                (not isinstance(userId, int) and not userId.isnumeric())): abort(400)
+                (not isinstance(userId, int) and not userId.isnumeric())):
+                abort(400)
+
         follower = Users.query.filter_by(id=user_id).first()
         followed = Users.query.filter_by(id=userId).first()
+        print("follower", follower)
+        print("followed", followed)
 
         # check to ensure user id is present
         if((not follower is None) and (not followed is None)):
@@ -270,15 +279,18 @@ def createUserFollow(user_id):
 @app.route('/api/users/<user_id>/follow', methods=['GET'])
 @requires_auth
 def getFollowerCount(user_id):
-    # Check to ensure the user id entered is an integer
-    if (not isinstance(user_id, int) and not user_id.isnumeric()): abort(400)
+    if ((not isinstance(user_id, int)) or (not user_id.isnumeric())):
+        abort(400)
+
     user = Users.query.filter_by(id=user_id).first()
-    # check to ensure user id is present
+    
     submission_errors = []
     if(not user is None ):
         follows = Follows.query.filter(Follows.user_id == user_id).all()
         followCount = len(follows)
+        print(followCount)
         return successResponse({"followers": followCount}),200
+
     submission_errors.append("user id invalid")
     return errorResponse(submission_errors),400
 
@@ -299,7 +311,7 @@ def getAllPosts():
 def addLikeToPost(post_id):
     submission_errors = []
     # Check to ensure the user id entered is an integer
-    if (not isinstance(post_id, int) and not post_id.isnumeric()): abort(400)
+    if (not isinstance(post_id, int) or not post_id.isnumeric()): abort(400)
     post = Posts.query.filter_by(id=post_id).first()
     # check to ensure post id is present
     if(not post is None ):
