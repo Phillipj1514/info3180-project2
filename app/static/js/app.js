@@ -537,7 +537,7 @@ const UserProfile = Vue.component('user-profile', {
                 <div class="title"> {{ userDetails.firstname }} {{ userDetails.lastname }} </div>
                 <div class="location"> {{ userDetails.location }} </div>
                 <div class="member-details">Member since {{ userDetails.joined_on }} </div>
-                <div class="biography-details"> {{ userDetails.biograhy }} </div>
+                <div class="biography-details"> {{ userDetails.biography }} </div>
             </div>
             <div class="engagement-container">
                 <div class="stats">
@@ -643,9 +643,9 @@ const UserProfile = Vue.component('user-profile', {
                 })
                 .then(function(jResponse) {
                     self.userDetails = jResponse;
-                    console.log(self.userDetails);
+                    console.log(self.userDetails.user_follow);
                 })
-                .catch(function(error) {
+                .catch(function(err) {
                     console.log(err);
                 })
             }
@@ -674,8 +674,7 @@ const UserProfile = Vue.component('user-profile', {
                     }
                 })
                 .then(function(jResponse) {
-                    console.log("jResponse");
-                    self.followers = jResponse;
+                    self.followers = jResponse.followers;
                 })
                 .catch(function(err) {
                     console.log(err);

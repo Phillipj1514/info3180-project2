@@ -137,13 +137,12 @@ def getUserDetail(user_id):
     # check to ensure user id is present
     submission_errors = []
     if(not user is None ):
-        followed = Follows.query.filter(Follows.follower_id == user.id).filter(Follows.user_id == user_id).first()
+        current_user = g.current_user['userid']
+        followed = Follows.query.filter(Follows.follower_id == current_user).filter(Follows.user_id == user_id).first()
 
         user_follow = False
-        print(user_follow)
-        print(followed)
 
-        if (not followed is None):
+        if (not (followed is None)):
             user_follow = True
 
         # Order user data
@@ -255,23 +254,24 @@ def createUserFollow(user_id):
         follower_id = addFollowForm.follower_id.data
 
         # Check to ensure the user id entered is an integer
-        if ((not isinstance(user_id, int) and not user_id.isnumeric()) or 
-                (not isinstance(userId, int) and not userId.isnumeric())):
-                abort(400)
+        if ((not isinstance(user_id, int) and not user_id.isnumeric()) or (not isinstance(userId, int) and not userId.isnumeric())):
+            abort(400)
 
         follower = Users.query.filter_by(id=user_id).first()
         followed = Users.query.filter_by(id=userId).first()
-        print("follower", follower)
-        print("followed", followed)
 
         # check to ensure user id is present
         if((not follower is None) and (not followed is None)):
             # current_user_id = g.current_user["userid"]
             # user_following_id = user.id 
-            follow = Follows(followed.id,follower.id)
-            db.session.add(follow)
-            db.session.commit()
-            return successResponse({"message": "You are now following that user."}),201
+            prevFollow = Follows.query.filter(Follows.user_id == followed.id).filter(Follows.follower_id == follower.id).first()
+
+            if (prevFollow is None):
+                follow = Follows(followed.id,follower.id)
+                db.session.add(follow)
+                db.session.commit()
+                return successResponse({"message": "You are now following that user."}),201
+
         submission_errors.append("user ids are invalid")
     return errorResponse(form_errors(addFollowForm)+submission_errors),400    
 
@@ -279,7 +279,7 @@ def createUserFollow(user_id):
 @app.route('/api/users/<user_id>/follow', methods=['GET'])
 @requires_auth
 def getFollowerCount(user_id):
-    if ((not isinstance(user_id, int)) or (not user_id.isnumeric())):
+    if ((not isinstance(user_id, int)) and (not user_id.isnumeric())):
         abort(400)
 
     user = Users.query.filter_by(id=user_id).first()
@@ -288,7 +288,10 @@ def getFollowerCount(user_id):
     if(not user is None ):
         follows = Follows.query.filter(Follows.user_id == user_id).all()
         followCount = len(follows)
-        print(followCount)
+
+        if followCount is None:
+            followCount = 0
+
         return successResponse({"followers": followCount}),200
 
     submission_errors.append("user id invalid")
