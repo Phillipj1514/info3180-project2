@@ -42,20 +42,29 @@ Vue.component('app-header', {
         goToProfile: function() {
             let userId;
             try {
-                userId = localStorage.getItem("userId");
-                router.push('/users/' + userId);
+                csrf = localStorage.getItem('csrf');
+                uToken = localStorage.getItem("token");
+                if (csrf === token) {
+                    userId = localStorage.getItem("userId");
+                    router.push('/users/' + userId);
+                }
             } catch  {
                 router.push('/login');
             }
+            router.push("/login");
         },
         goToFeed: function() {
-            let userId;
+            let csrf;
             try {
-                token = localStorage.getItem("token");
-                router.push('/explore');
+                csrf = localStorage.getItem('csrf');
+                uToken = localStorage.getItem("token");
+                if (csrf === token) {
+                    router.push('/explore');
+                }
             } catch  {
                 router.push("/login");
             }
+            router.push("/login");
         },
         logout: function() {
             let self = this;
@@ -279,7 +288,6 @@ const Login = Vue.component('login', {
             let self = this;
             let lForm = document.getElementById('loginForm');
             let lformdata = new FormData(lForm);
-            //console.log(lformdata.get("username"));
 
             fetch('/api/auth/login', {
                 method: 'POST',
@@ -293,10 +301,10 @@ const Login = Vue.component('login', {
                 return response.json();
             })
             .then(function(jResponse) {
-                //console.log(jResponse);
                 if (jResponse.hasOwnProperty("message")) {
                     localStorage.setItem('token', jResponse.token);
                     localStorage.setItem('userId', jResponse.userId);
+                    localStorage.setIten('csrf', token);
                     router.push('/explore');
                 } else {
                     self.errors = jResponse.error;
@@ -389,10 +397,8 @@ const Feed = Vue.component('feed', {
                 })
                 .then(function(jResponse) {
                     self.posts = jResponse.posts;
-                    console.log(self.posts);
                     self.showPosts =  self.posts !== []? 'show' : 'hide';
                     self.posts.forEach(element => {
-                        console.log(element.user_photo);
                     });
                 })
                 .catch(function(err) {
@@ -604,10 +610,9 @@ const UserProfile = Vue.component('user-profile', {
                 })
                 .then(function(jResponse) {
                     self.posts = jResponse.posts;
-                    console.log(self.posts);
                     self.postCount = self.posts.length;
                 })
-                .catch(function(error) {
+                .catch(function(err) {
                     console.log(err);
                 })
             }
@@ -643,7 +648,6 @@ const UserProfile = Vue.component('user-profile', {
                 })
                 .then(function(jResponse) {
                     self.userDetails = jResponse;
-                    console.log(self.userDetails.user_follow);
                 })
                 .catch(function(err) {
                     console.log(err);

@@ -59,9 +59,9 @@ main {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    max-height: 300px;
+    max-height: 350px;
     flex-wrap: wrap;
-    margin: 0 1rem;
+    padding: 0 1rem;
 }
 
 .full-height {
@@ -88,8 +88,8 @@ main {
 }
 
 .card-header-image {
-    max-height: 1rem;
-    max-width: 1.5rem;
+    max-height: 2rem;
+    max-width: 2.5rem;
     margin-right: 20px;
 }
 
@@ -126,6 +126,7 @@ main {
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
+    margin-top: 3rem;
 }
 
 .home-btns.btn {
