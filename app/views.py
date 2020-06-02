@@ -126,7 +126,7 @@ def logout():
     spoiltoken = JWTBlacklist(g.current_token)
     db.session.add(spoiltoken)
     db.session.commit()
-    return successResponse({"message": "User successfully logged out."})
+    return successResponse({"message": "User successfully logged out."}), 200
 
 @app.route('/api/users/<user_id>', methods=['GET'])
 @requires_auth

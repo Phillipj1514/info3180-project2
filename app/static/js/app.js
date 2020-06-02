@@ -17,15 +17,57 @@ Vue.component('app-header', {
             <router-link class="nav-link" to="/explore">Explore <span class="sr-only">(current)</span></router-link>
           </li>  
           <li class="nav-item active">
-            <router-link class="nav-link" to="/my_profile">My Profile<span class="sr-only">(current)</span></router-link>
+            <div class="nav-link" v-on:click="goToProfile">My Profile<span class="sr-only">(current)</span></div>
           </li>  
           <li class="nav-item active">
-            <router-link class="nav-link" to="/logout">Logout<span class="sr-only">(current)</span></router-link>
+            <div class="nav-link" v-on:click="logout">Logout<span class="sr-only">(current)</span></router-link></div>
           </li>  
         </ul>
       </div>
     </nav>
-    `
+    `,
+    methods: {
+        goToProfile: function() {
+            let userId;
+            try {
+                userId = localStorage.getItem("userId");
+                router.push('/users/' + userId);
+            } catch  {
+                router.push("/login");
+            }
+        },
+        logout: function() {
+            let self = this;
+
+            let csrfToken = token;
+            let userToken = self.getUserToken();
+
+            if (userToken === csrfToken) {
+                router.push("/login");
+            }
+
+            fetch("/api/auth/logout", {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Authorization': 'Bearer ' + userToken
+                }
+            })
+            .then(function(response) {
+                if (response.status === 200) {
+                    router.push('/');
+                } 
+                return response.json;
+            })
+            .catch(function (err) {
+                console.log(err);
+            });
+        },
+        getUserToken: function() {
+            let uToken = localStorage.getItem('token') || token;
+            return uToken;
+        },
+    }
 });
 
 Vue.component('app-footer', {
@@ -378,7 +420,7 @@ const Feed = Vue.component('feed', {
             }
         },
         goToProfile: function(userId) {
-            router.push('/users/' + userId)
+            router.push('/users/' + userId);
         }
     }
 });
