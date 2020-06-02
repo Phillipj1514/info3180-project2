@@ -465,7 +465,7 @@ const CreatePost = Vue.component('post', {
 
 const UserProfile = Vue.component('user-profile', {
     template: `
-    <div class="full-page-container">
+    <div class="container regular">
         <div class="profile-head-cotainer">
             <img src="'../static/images/profile_photos/' + userDetails.photo" alt='Profile Photo' style="width:100px; height:100px;"/> 
             <div class="profile-details-container">
@@ -596,7 +596,8 @@ const UserProfile = Vue.component('user-profile', {
                     }
                 })
                 .then(function(jResponse) {
-                    self.userDetails = jResponse.userDetail;
+                    self.userDetails = jResponse;
+                    console.log(self.userDetails);
                 })
                 .catch(function(error) {
                     console.log(err);

@@ -137,11 +137,6 @@ def getUserDetail(user_id):
     # check to ensure user id is present
     submission_errors = []
     if(not user is None ):
-        posts = Posts.query.filter(Posts.user_id == user_id).all()
-        posted_items = []
-        if(len(posts) > 0):
-            for post in posts:
-                posted_items.append(getPostDetails(post))
 
         # Order user data
         userDetail = {
@@ -153,8 +148,7 @@ def getUserDetail(user_id):
             "location": user.location,
             "biography": user.biography,
             "photo": user.profile_photo,
-            "joined_on": user.joined_on.strftime("%m/%Y"),
-            "posts":posted_items
+            "joined_on": user.joined_on.strftime("%B, %Y")
         }
         return successResponse(userDetail)
     submission_errors.append("user id invalid")
