@@ -239,7 +239,7 @@ def getPostDetails(post):
         "caption": post.caption,
         "likes": likes,
         "user_liked": user_liked,
-        "created_on":post.created_on.strftime("%m/%d/%Y, %H:%M:%S")
+        "created_on":post.created_on.strftime("%d %B, %Y")
     }
     return item   
 
@@ -314,15 +314,24 @@ def getAllPosts():
 def addLikeToPost(post_id):
     submission_errors = []
     # Check to ensure the user id entered is an integer
-    if (not isinstance(post_id, int) or not post_id.isnumeric()): abort(400)
+    try:
+        post_id = int(post_id)
+    except:
+        abort(errorResponse({"error": "Post id must be an integer"}),400)
+    print(type(post_id))
     post = Posts.query.filter_by(id=post_id).first()
+    print(post)
     # check to ensure post id is present
     if(not post is None ):
         current_user_id = g.current_user["userid"]
-        user_post_id = post.id 
-        like = Likes(current_user_id, post_id)
-        db.session.add(like)
-        db.session.commit()
+        user_post_id = post.id
+
+        already_like = Likes.query.filter(Likes.user_id == current_user_id).filter(Likes.post_id == user_post_id).first()
+
+        if (already_like is None):
+            like = Likes(current_user_id, post_id)
+            db.session.add(like)
+            db.session.commit()
         # Count the Likes
         likes = Likes.query.filter(Likes.post_id == post_id).all()
         numLikes = len(likes)

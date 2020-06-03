@@ -73,7 +73,7 @@ Vue.component('app-header', {
             let userToken = self.getUserToken();
 
             if (userToken === csrfToken) {
-                router.push("/login");
+                router.push("/");
             }
 
             fetch("/api/auth/logout", {
@@ -304,7 +304,7 @@ const Login = Vue.component('login', {
                 if (jResponse.hasOwnProperty("message")) {
                     localStorage.setItem('token', jResponse.token);
                     localStorage.setItem('userId', jResponse.userId);
-                    localStorage.setIten('csrf', token);
+                    localStorage.setItem('csrf', token);
                     router.push('/explore');
                 } else {
                     self.errors = jResponse.error;
@@ -324,39 +324,41 @@ const Login = Vue.component('login', {
 
 const Feed = Vue.component('feed', {
     template: `
-    <div class="container feed-page">
-        <div class="no-content alert alert-info" v-if="showPosts === 'show'">There are no posts to show yet. Go create a post!</div>
-        <div class="feed-posts">
-            <div class="post card" v-for="(post,index) in posts">
-                <div class="post-header">
-                    <img v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
-                    <div class="poster" v-on:click="goToProfile(post.user_id)"> {{ post.user_name }} </div>                        
-                </div>
-                <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo"/>
-                <div class='post-caption'>{{ post.caption }}</div>
-                <div class="post-footer">
-                    <div class="like-details footer-left">
-                        <i v-if="post.user_liked === true" class="fa fa-heart"></i>
-                        <i v-if="post.user_liked === false" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
-                        {{ post.likes }}
-                        <p class="like-text" v-if="(post.likes === 0) && (post.likes > 1)">Likes</p>
-                        <p class="like-text" v-if="(post.likes === 1)">Like</p>
+    <div class="feed-page">
+    <div class="feed-page-container">
+        <div class="no-content alert alert-info" v-if="showPosts === 'hide'">There are no posts to show yet. Go create a post!</div>
+            <div class="feed-posts">
+                <div class="post card" v-for="(post,index) in posts">
+                    <div class="post-header">
+                        <img class="post-profile-img img-circle img-responsive" v-bind:src="'../static/images/profile_photos/' + post.user_photo"/>
+                        <div class="poster" v-on:click="goToProfile(post.user_id)"> {{ post.user_name }} </div>                        
                     </div>
-                    <div class="alert alert-info" v-if="(attemptLike === post.id) && (message !== '')"> {{ message }}</div>
-                    <div class="footer-right">{{ post.created_on }}</div>
-                </div>
-
-            </div>                
+                    <img class="post-image img-responsive img" v-bind:src="'../static/images/posts/' + post.photo"/>
+                    <div class='post-caption'>{{ post.caption }}</div>
+                    <div class="post-footer">
+                        <div class="like-details footer-left">
+                            <i v-if="post.user_liked === true" class="fa fa-heart"></i>
+                            <i v-if="post.user_liked === false" class="fa fa-heart-o" v-on:click="registerLike(post.id, index)"></i>
+                            {{ post.likes }}
+                            <p class="like-text" v-if="(post.likes === 0) || (post.likes > 1)">Likes</p>
+                            <p class="like-text" v-if="(post.likes === 1)">Like</p>
+                        </div>
+                        <div class="alert alert-info" v-if="(attemptLike === post.id) && (message !== '')"> {{ message }}</div>
+                        <div class="footer-right">{{ post.created_on }}</div>
+                    </div>
+                </div>                
+            </div>
         </div>
-        <div class="sidebar">
+        <div class="right-sidebar">
              <button type="submit" class="btn btn-primary new-post-btn" v-on:click="createPost">New Post</button>   
         </div>
+    </div>
     </div>
    `,
     data: function () {
         return {
             posts : [],
-            showPosts: 'hide',
+            showPosts: ' ',
             message: '',
             attemptLike: ''
         }
@@ -375,13 +377,15 @@ const Feed = Vue.component('feed', {
             try{
                 csrfToken = token;
             } catch {
+                console.log("no app token");
                 router.push('/login');
             }
 
             if (userToken === csrfToken) {
+                console.log("no user token");
                 router.push('/login');
             } else {
-                fetch("/api/posts", {
+                fetch('/api/posts', {
                     method: 'GET',
                     headers: {
                         'X-CSRFToken': csrfToken,
@@ -423,8 +427,9 @@ const Feed = Vue.component('feed', {
             if (userToken === csrfToken) {
                 router.push('/login');
             } else {
-                fetch("/api/posts/" + postId + "/like", {
+                fetch('/api/posts/' + postId + '/like', {
                     method: 'POST',
+                    body: {},
                     headers: {
                         'X-CSRFToken': csrfToken,
                         'Authorization': "Bearer " + userToken
@@ -440,7 +445,7 @@ const Feed = Vue.component('feed', {
                         self.attemptLike = '';
                         self.message = '';
                     }else {
-                        this.message = jResponse.error;
+                        console.log(jResponse.error);
                     }
                 })
                 .catch(function(err) {
@@ -507,7 +512,7 @@ const CreatePost = Vue.component('post', {
                 let postForm = document.getElementById('newPostForm');
                 let uformdata = new FormData(postForm);
 
-                fetch("/api/users/" + userId + "/posts", {
+                fetch('/api/users/' + userId + '/posts', {
                     method: 'POST',
                     body: uformdata,
                     headers: {
@@ -594,7 +599,7 @@ const UserProfile = Vue.component('user-profile', {
             if (userToken === csrfToken) {
                 router.push('/login');
             } else {
-                fetch("/api/users/" + userId + "/posts", {
+                fetch('/api/users/' + userId + '/posts', {
                     method: 'GET',
                     headers: {
                         'X-CSRFToken': csrfToken,
@@ -782,7 +787,6 @@ const router = new VueRouter({
         {path: "*", component: NotFound }
     ]
 });
-
 
 // Instantiate our main Vue Instance
 let app = new Vue({
