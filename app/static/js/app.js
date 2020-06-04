@@ -84,6 +84,9 @@ Vue.component('app-header', {
                 }
             })
             .then(function(response) {
+                if (response.status === 400 || response.status === 401) {
+                    router.push("/");
+                }
                 if (response.status === 200) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('userId');
