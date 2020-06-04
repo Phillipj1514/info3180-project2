@@ -318,9 +318,9 @@ def addLikeToPost(post_id):
         post_id = int(post_id)
     except:
         abort(errorResponse({"error": "Post id must be an integer"}),400)
-    print(type(post_id))
+
     post = Posts.query.filter_by(id=post_id).first()
-    print(post)
+
     # check to ensure post id is present
     if(not post is None ):
         current_user_id = g.current_user["userid"]
