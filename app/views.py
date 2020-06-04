@@ -185,7 +185,7 @@ def createUserPost(user_id):
         photo_name = secure_filename(photo_name)
 
         # check to ensure user id is present
-        if(user is None ):
+        if(user is None or len(submission_errors) > 0):
             success = False
             submission_errors.append("user id invalid")
         if(success):

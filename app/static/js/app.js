@@ -44,27 +44,25 @@ Vue.component('app-header', {
             try {
                 csrf = localStorage.getItem('csrf');
                 uToken = localStorage.getItem("token");
-                if (csrf === token) {
+                if (uToken) {
                     userId = localStorage.getItem("userId");
                     router.push('/users/' + userId);
                 }
             } catch  {
                 router.push('/login');
             }
-            router.push("/login");
         },
         goToFeed: function() {
             let csrf;
             try {
                 csrf = localStorage.getItem('csrf');
                 uToken = localStorage.getItem("token");
-                if (csrf === token) {
+                if (uToken) {
                     router.push('/explore');
                 }
             } catch  {
                 router.push("/login");
             }
-            router.push("/login");
         },
         logout: function() {
             let self = this;
@@ -90,6 +88,7 @@ Vue.component('app-header', {
                 if (response.status === 200) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('userId');
+                    localStorage.removeItem('csrf');
                     router.push('/');
                 } 
                 return response.json;
@@ -544,9 +543,9 @@ const CreatePost = Vue.component('post', {
 
 const UserProfile = Vue.component('user-profile', {
     template: `
-    <div class="container regular">
-        <div class="profile-head-cotainer">
-            <img v-bind:src="'../static/images/profile_photos/' + userDetails.photo" alt='Profile Photo'/> 
+    <div class="regular profile-page">
+        <div class="profile-head-container">
+            <img class="img profile-page-head-img" v-bind:src="'../static/images/profile_photos/' + userDetails.photo" alt='Profile Photo'/> 
             <div class="profile-details-container">
                 <div class="title"> {{ userDetails.firstname }} {{ userDetails.lastname }} </div>
                 <div class="location"> {{ userDetails.location }} </div>
@@ -569,8 +568,8 @@ const UserProfile = Vue.component('user-profile', {
             </div>
         </div>
         <div v-if="posts === []" class="no-posts">This user hasn't posted anything yet.</div>
-        <div class="posts-container col-md-3">
-                <img class="post-image img-responsive img"  v-for="(post,index) in posts" v-bind:src="'../static/images/posts/' + post.photo"/>
+        <div class="posts-container">
+                <img class="profile-post-image img-responsive img"  v-for="(post,index) in posts" v-bind:src="'../static/images/posts/' + post.photo"/>
             </div>                
         </div>
         </div>

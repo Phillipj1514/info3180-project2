@@ -5,6 +5,8 @@ body {
     background-color: #efe7e2;
     align-items: center;
     justify-content: center;
+    color: #3c3634;
+    font-family: 'Roboto', sans-serif;
 }
 
 html {
@@ -272,7 +274,7 @@ h1 {
     align-items: center;
     width: 90%;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.2rem;
     padding: 15px;
     align-self: flex-start;
 }
@@ -289,6 +291,7 @@ h1 {
     -moz-border-radius: 5px;
     -ms-border-radius: 5px;
     -o-border-radius: 5px;
+    max-width: 580px;
 }
 
 .post-profile-img {
@@ -305,8 +308,6 @@ h1 {
 .post-image {
     width: 580px;
     height: 580px;
-    /*max-width: 550px;
-    max-height: 550px;*/
     margin-bottom: 20px;
     border: 1px solid #abafb0;
 }
@@ -359,3 +360,118 @@ h1 {
     display: flex;
 }
 
+.profile-page {
+    margin-top: 7rem;
+    min-width: 280px;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-head-container {
+    width: 100%;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    margin: .5rem;
+    display: flex;
+    flex-direction: row;
+    background-color: #f9fcff;
+    border: 1px solid #3c363450;
+    box-shadow: 3px 2px #3c363430;
+    padding: 20px;
+    margin-bottom: 1rem;
+}
+
+.profile-page-head-img {
+    width: 250px;
+    height: 250px;
+}
+
+.profile-details-container {
+    display: flex;
+    flex-direction: column;
+    margin: 0 30px;
+    text-align: left;
+    min-width: 50%;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 1.5rem;
+    color: #6c757d;
+}
+
+.location, .member-details {
+    text-align: left;
+    margin-bottom: 10px;
+    color: #6c757d;
+}
+
+.biography-details {
+    margin-top: 20px;
+    overflow: hidden;
+    color: #6c757d;
+}
+
+.posts-container {
+    /*margin-left: -25px;*/
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-gap: 10px;
+}
+
+.profile-post-image {
+    width: 100%;
+    height: 400px;
+}
+
+.engagement-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+}
+
+.stats {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    align-self: self-start;
+    justify-content: space-between;
+    height: 40%;
+}
+
+.stat {
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-value {
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+.stat-label {
+    color: #b4bcc3;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.follow-btn {
+    width: 90%;
+    margin-top: 30px;
+    height: 50px;
+}
