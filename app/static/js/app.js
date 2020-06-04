@@ -463,8 +463,8 @@ const Feed = Vue.component('feed', {
 
 const CreatePost = Vue.component('post', {
     template: `
-        <div>
-            <h1>New Post</h1>
+        <div class="container regular">
+            <h1>Make Post</h1>
             <div class="auth-form-container">
                 <div class="message-container">
                     <ul class="alert alert-danger" v-if="formValid === 'not_valid'" id="errors">
