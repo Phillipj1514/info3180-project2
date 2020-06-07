@@ -32,7 +32,7 @@ class UserRegistrationForm(FlaskForm):
 
     profile_photo = FileField('Profile Picture', 
         validators=[FileRequired(),
-        FileAllowed(['jpg', 'png', 'Images only!'])])
+        FileAllowed(['jpg', 'png', 'jpeg', 'Images only!'])])
 
 class LoginForm(FlaskForm):
     username = StringField('Username', 
@@ -47,7 +47,7 @@ class AddPostForm(FlaskForm):
 
     photo = FileField('Photo', 
         validators=[FileRequired(),
-        FileAllowed(['jpg', 'png', 'Images only!'])])
+        FileAllowed(['jpg', 'png', 'jpeg', 'Images Only'])])
 
 class AddFollowForm(FlaskForm):
     user_id = IntegerField('User Id', 
