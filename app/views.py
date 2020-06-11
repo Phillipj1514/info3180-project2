@@ -4,8 +4,8 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
-import os, datetime
-from app import app, db
+import os, datetime, uuid
+from app import app, db, posts_folder, profile_photo_folder
 from flask import render_template, request,redirect, url_for, flash,abort, jsonify,g
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
@@ -23,17 +23,12 @@ db.create_all()
 # Please create all new routes and view functions above this route.
 # This route is now our catch all route for our VueJS single page
 # application.
+
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def index(path):
-    """
-    Because we use HTML5 history mode in vue-router we need to configure our
-    web server to redirect all routes to index.html. Hence the additional route
-    "/<path:path".
-
-    Also we will render the initial webpage and then let VueJS take control.
-    """
-    return render_template('index.html')
+def index(path):               
+     return render_template('index.html')
 
 # Here we define a function to collect form errors from Flask-WTF
 # which we can later use
@@ -54,10 +49,11 @@ def form_errors(form):
 # User registration endpoint
 @app.route('/api/users/register', methods=['POST'])
 def userRegister():
-    userRegistrationForm = UserRegistrationForm(csrf_enabled=False)
+    userRegistrationForm = UserRegistrationForm() #(csrf_enabled=False)
     submission_errors = []
+
     if request.method == 'POST' and userRegistrationForm.validate_on_submit():
-        success = True   
+        success = True
         username = userRegistrationForm.username.data
         password = userRegistrationForm.password.data
         confirmed_password  = userRegistrationForm.confirm_password.data
@@ -67,7 +63,14 @@ def userRegister():
         location = userRegistrationForm.location.data
         biography = userRegistrationForm.biography.data
         profile_photo = userRegistrationForm.profile_photo.data
-        profile_photo_name = secure_filename(profile_photo.filename)
+
+        fileuid = str(uuid.uuid4())
+        oldfilename = profile_photo.filename.split(".")
+        name = oldfilename[0]
+        ext = oldfilename[-1]
+        profile_photo_name = (fileuid + name + "." + ext).replace('-', '_')
+        profile_photo_name = secure_filename(profile_photo_name)
+
         if(password != confirmed_password): 
             success = False
             submission_errors.append("password and confirm passowrd is different")
@@ -78,22 +81,24 @@ def userRegister():
             success = False
             submission_errors.append("email already used")
         # Save the data if the information entered is valid and new 
-        if(success):
+        if(success == True):
             profile_photo.save(os.path.join(
-                app.config['UPLOAD_FOLDER'],profile_photo_name
+                profile_photo_folder, profile_photo_name
             ))
             user = Users(username,password,firstname,lastname, email, location, biography, profile_photo_name,datetime.datetime.now())
             db.session.add(user)
             db.session.commit()
             return successResponse({"message": "User successfully registered"}),201
     # If the form fail to submit it returns an error message
-    return errorResponse(form_errors(userRegistrationForm)+submission_errors),400
+    errors = errorResponse(form_errors(userRegistrationForm)+submission_errors)
+    return errors,400
 
 # user login endpoint
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    loginForm = LoginForm(csrf_enabled=False)
+    loginForm = LoginForm() 
     submission_errors = []
+
     if request.method == 'POST' and loginForm.validate_on_submit():
         username = loginForm.username.data
         password = loginForm.password.data
@@ -103,11 +108,16 @@ def login():
             # and generate the user token
             payload = {"userid":user.id,"time":datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
             token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-            return successResponse({'message':username+"User successfully logged in.",
-                                        'token':token})
+            return successResponse({
+                'message': username+" User successfully logged in.", 
+                "token": token,
+                "userId": user.id
+            }),200
         # Add user validation error
-        submission_errors.append("username or password invallid")
-    return errorResponse(form_errors(loginForm)+submission_errors)
+        submission_errors.append("username or password invalid")
+
+    return errorResponse(form_errors(loginForm)+submission_errors),403
+
 
 # User logout endpoint
 @app.route('/api/auth/logout', methods=['GET'])
@@ -116,7 +126,7 @@ def logout():
     spoiltoken = JWTBlacklist(g.current_token)
     db.session.add(spoiltoken)
     db.session.commit()
-    return successResponse({"message": "User successfully logged out."})
+    return successResponse({"message": "User successfully logged out."}), 200
 
 @app.route('/api/users/<user_id>', methods=['GET'])
 @requires_auth
@@ -127,18 +137,13 @@ def getUserDetail(user_id):
     # check to ensure user id is present
     submission_errors = []
     if(not user is None ):
-        posts = Posts.query.filter(Posts.user_id == user_id).all()
-        posted_items = []
-        if(len(posts) > 0):
-            for post in posts:
-                item = {
-                    "id":post.id,
-                    "user_id":post.user_id,
-                    "photo": post.photo,
-                    "caption": post.caption,
-                    "created_on":post.created_on.strftime("%m/%d/%Y, %H:%M:%S")
-                }
-                posted_items.append(item)
+        current_user = g.current_user['userid']
+        followed = Follows.query.filter(Follows.follower_id == current_user).filter(Follows.user_id == user_id).first()
+
+        user_follow = False
+
+        if (not (followed is None)):
+            user_follow = True
 
         # Order user data
         userDetail = {
@@ -149,9 +154,9 @@ def getUserDetail(user_id):
             "email": user.email,
             "location": user.location,
             "biography": user.biography,
-            "profile_photo": user.profile_photo,
-            "joined_on": user.joined_on.strftime("%m/%d/%Y, %H:%M:%S"),
-            "posts":posted_items
+            "photo": user.profile_photo,
+            "joined_on": user.joined_on.strftime("%B, %Y"),
+            "user_follow": user_follow
         }
         return successResponse(userDetail)
     submission_errors.append("user id invalid")
@@ -161,7 +166,7 @@ def getUserDetail(user_id):
 @app.route('/api/users/<user_id>/posts', methods=['POST'])
 @requires_auth
 def createUserPost(user_id):
-    addPostForm = AddPostForm(csrf_enabled=False)
+    addPostForm = AddPostForm() #(csrf_enabled=False)
     submission_errors = []
     if request.method == 'POST' and addPostForm.validate_on_submit():
         # Check to ensure the user id entered is an integer
@@ -171,14 +176,21 @@ def createUserPost(user_id):
         success = True  
         caption = addPostForm.caption.data
         photo = addPostForm.photo.data
-        photo_name = secure_filename(photo.filename)
+
+        fileuid = str(uuid.uuid4())
+        oldfilename = photo.filename.split(".")
+        name = oldfilename[0]
+        ext = oldfilename[-1]
+        photo_name = (fileuid + name + "." + ext).replace('-', '_')
+        photo_name = secure_filename(photo_name)
+
         # check to ensure user id is present
-        if(user is None ):
+        if(user is None or len(submission_errors) > 0):
             success = False
             submission_errors.append("user id invalid")
         if(success):
             photo.save(os.path.join(
-                app.config['UPLOAD_FOLDER'],photo_name
+                posts_folder, photo_name
             ))
             # create the post and add it to the database
             post = Posts(user_id, photo_name, caption, datetime.datetime.now())
@@ -201,29 +213,50 @@ def getUserPosts(user_id):
         posted_items = []
         if(len(posts) > 0):
             for post in posts:
-                item = {
-                    "id":post.id,
-                    "user_id":post.user_id,
-                    "photo": post.photo,
-                    "caption": post.caption,
-                    "created_on":post.created_on.strftime("%m/%d/%Y, %H:%M:%S")
-                }
-                posted_items.append(item)
+                posted_items.append(getPostDetails(post))
+            
         return successResponse({"posts":posted_items})
     submission_errors.append("user id invalid")
     return errorResponse(submission_errors),400
 
+def getPostDetails(post):
+    userDet = Users.query.filter(Users.id == post.user_id).first()
+    user_name = userDet.username
+    user_photo = userDet.profile_photo
+    likes = Likes.query.filter(Likes.post_id == post.id).count()
+    user_like = Likes.query.filter(Likes.post_id == post.id).filter(Likes.user_id == post.user_id).first()
+    user_liked = False
+
+    if (not user_like is None):
+        user_liked = True
+
+    item = {
+        "id": post.id,
+        "user_id": post.user_id,
+        "user_name": user_name,
+        "user_photo": user_photo,
+        "photo": post.photo,
+        "caption": post.caption,
+        "likes": likes,
+        "user_liked": user_liked,
+        "created_on":post.created_on.strftime("%d %B, %Y")
+    }
+    return item   
+
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @requires_auth
 def createUserFollow(user_id):
-    addFollowForm = AddFollowForm(csrf_enabled=False)
+    addFollowForm = AddFollowForm()
     submission_errors = []
+
     if request.method == 'POST' and addFollowForm.validate_on_submit():
         userId = addFollowForm.user_id.data
         follower_id = addFollowForm.follower_id.data
+
         # Check to ensure the user id entered is an integer
-        if ((not isinstance(user_id, int) and not user_id.isnumeric()) or 
-                (not isinstance(userId, int) and not userId.isnumeric())): abort(400)
+        if ((not isinstance(user_id, int) and not user_id.isnumeric()) or (not isinstance(userId, int) and not userId.isnumeric())):
+            abort(400)
+
         follower = Users.query.filter_by(id=user_id).first()
         followed = Users.query.filter_by(id=userId).first()
 
@@ -231,10 +264,14 @@ def createUserFollow(user_id):
         if((not follower is None) and (not followed is None)):
             # current_user_id = g.current_user["userid"]
             # user_following_id = user.id 
-            follow = Follows(followed.id,follower.id)
-            db.session.add(follow)
-            db.session.commit()
-            return successResponse({"message": "You are now following that user."}),201
+            prevFollow = Follows.query.filter(Follows.user_id == followed.id).filter(Follows.follower_id == follower.id).first()
+
+            if (prevFollow is None):
+                follow = Follows(followed.id,follower.id)
+                db.session.add(follow)
+                db.session.commit()
+                return successResponse({"message": "You are now following that user."}),201
+
         submission_errors.append("user ids are invalid")
     return errorResponse(form_errors(addFollowForm)+submission_errors),400    
 
@@ -242,15 +279,21 @@ def createUserFollow(user_id):
 @app.route('/api/users/<user_id>/follow', methods=['GET'])
 @requires_auth
 def getFollowerCount(user_id):
-    # Check to ensure the user id entered is an integer
-    if (not isinstance(user_id, int) and not user_id.isnumeric()): abort(400)
+    if ((not isinstance(user_id, int)) and (not user_id.isnumeric())):
+        abort(400)
+
     user = Users.query.filter_by(id=user_id).first()
-    # check to ensure user id is present
+    
     submission_errors = []
     if(not user is None ):
         follows = Follows.query.filter(Follows.user_id == user_id).all()
         followCount = len(follows)
-        return successResponse({"followers": followCount}),201
+
+        if followCount is None:
+            followCount = 0
+
+        return successResponse({"followers": followCount}),200
+
     submission_errors.append("user id invalid")
     return errorResponse(submission_errors),400
 
@@ -258,19 +301,12 @@ def getFollowerCount(user_id):
 @app.route('/api/posts', methods=['GET'])
 @requires_auth
 def getAllPosts():
-    posts = Posts.query.order_by(Posts.user_id).all()
+    posts = Posts.query.order_by(Posts.created_on.desc()).all()
     posted_items = []
     if(len(posts) > 0):
         for post in posts:
-            item = {
-                "id":post.id,
-                "user_id":post.user_id,
-                "photo": post.photo,
-                "caption": post.caption,
-                "created_on":post.created_on.strftime("%m/%d/%Y, %H:%M:%S")
-            }
-            posted_items.append(item)
-    return successResponse({"posts":posted_items}),201
+            posted_items.append(getPostDetails(post))
+    return successResponse({"posts": posted_items}),200
     
 
 @app.route('/api/posts/<post_id>/like', methods=['POST'])
@@ -278,15 +314,24 @@ def getAllPosts():
 def addLikeToPost(post_id):
     submission_errors = []
     # Check to ensure the user id entered is an integer
-    if (not isinstance(post_id, int) and not post_id.isnumeric()): abort(400)
+    try:
+        post_id = int(post_id)
+    except:
+        abort(errorResponse({"error": "Post id must be an integer"}),400)
+
     post = Posts.query.filter_by(id=post_id).first()
+
     # check to ensure post id is present
     if(not post is None ):
         current_user_id = g.current_user["userid"]
-        user_post_id = post.id 
-        like = Likes(current_user_id, post_id)
-        db.session.add(like)
-        db.session.commit()
+        user_post_id = post.id
+
+        already_like = Likes.query.filter(Likes.user_id == current_user_id).filter(Likes.post_id == user_post_id).first()
+
+        if (already_like is None):
+            like = Likes(current_user_id, post_id)
+            db.session.add(like)
+            db.session.commit()
         # Count the Likes
         likes = Likes.query.filter(Likes.post_id == post_id).all()
         numLikes = len(likes)
@@ -311,7 +356,7 @@ def getLikesCount(post_id):
 
 # APi request response
 def successResponse(message):
-    return jsonify(message )
+    return jsonify(message)
 
 def errorResponse(error):
     return jsonify(error=error)

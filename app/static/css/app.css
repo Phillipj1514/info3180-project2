@@ -1,3 +1,478 @@
 body {
-    padding-top: 5rem;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #efe7e2;
+    align-items: center;
+    justify-content: center;
+    color: #3c3634;
+    font-family: 'Roboto', sans-serif;
+}
+
+html {
+    height: 100%;
+}
+
+#main, #app {
+    height: 100vh;
+}
+
+main {
+    height: 95vh;
+}
+
+.header-logo {
+    max-width: 2.5rem;
+    max-height: 2rem;
+    flex: 1;
+}
+
+.navbar-brand {
+    font-family: 'Lobster', cursive;
+    color: 	#f9fcff;
+    flex: 6 0 60%;
+    margin-left: 10px;
+}
+
+.navbar-toggler {
+    flex: 1 0 10%;
+}
+
+.nav-link {
+    font-family: 'Roboto', sans-serif;
+    font-weight: normal;
+    font-size: 1rem;
+    color: 	#f9fcff;
+}
+
+.navbar, .navbar-nav {
+    background-color: #4a90e2;
+}
+
+.btn-primary {
+    background-color: #4a90e2;
+}
+
+.success {
+    background-color: #89b23d;
+}
+
+.home-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    max-height: 350px;
+    flex-wrap: wrap;
+    padding: 0 1rem;
+}
+
+.full-height {
+    height: 95vh;
+}
+
+.home-page-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-image, .home-auth-card {
+    flex: 1 0 47%;
+    margin: 0 1rem;
+    max-width: 400px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.card-header-image {
+    max-height: 2rem;
+    max-width: 2.5rem;
+    margin-right: 20px;
+}
+
+.home-card-header {
+    font-family: 'Lobster', cursive;
+    font-size: 1.5rem;
+}
+
+.home-auth-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.home-card-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.card-body, .card-text {
+    width: 100%;
+    align-self: center;
+    text-align: center;
+}
+
+.home-btns {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 3rem;
+}
+
+.home-btns.btn {
+    max-width: 47%;
+    font-weight: bold;
+}
+
+.divider {
+    background-color: #d3d3d3;
+    border: 1px solid #d3d3d3;
+    width: 80%;
+}
+
+.no-error {
+    visibility: hidden;
+}
+
+.error {
+    visibility: visible;
+    color: red;
+    font-size: 15px;
+    margin-top: 3px;
+    margin-left: 2px;
+}
+
+.auth-form-container {
+    margin-top: 2rem;
+    padding: 30px 20px;
+    width: 80%;
+    min-width: 280px;
+    background-color: #fff;
+    border-radius: 10px;;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+
+.regular {
+    margin-top: 5.5rem;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+footer {
+    margin-top: 1rem;
+    position: fixed;
+}
+
+.reg-btn {
+    min-width: 250px;
+    width: 100%;
+    align-self: center;
+    margin-top: 25px;
+}
+
+#registrationForm {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+.alert {
+    padding-left: 10px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+.fa-heart, .fa-heart-o {
+    width: 40px;
+    height: 40px;  
+}
+
+h1 {
+    color: #3c3634;
+}
+
+#loginBtn.btn.btn-success {
+    width: 100%;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.register-link {
+    color: #0062cc;
+}
+
+.btn{
+    color: #fff;
+    font-weight: bold;
+}
+
+.fa-heart {
+    color: red;
+}
+
+.feed-posts {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+}
+
+.feed-page {
+    display: grid;
+    grid-template-rows: 7rem auto;
+    grid-template-columns: 20% 60% 20%;
+    height: 95vh;
+}
+
+.right-sidebar {
+    grid-row-start: 2;
+    grid-column-start: 3;
+    display: flex;
+    align-items: self-start;
+    justify-content: center;
+}
+
+.feed-page-container {
+    width: 100%;
+    min-width: 280px;
+    background-color: #fff;
+    background-color: transparent;
+    grid-row-start: 2;
+    grid-column-start: 2;
+}
+
+.new-post-btn {
+    width: 250px;
+}
+
+.post-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    width: 90%;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 15px;
+    align-self: flex-start;
+}
+
+.post {
+    background-color: #f9fcff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    max-width: 580px;
+}
+
+.post-profile-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    border: 1px solid #abafb0;
+}
+
+.post-image {
+    width: 580px;
+    height: 580px;
+    margin-bottom: 20px;
+    border: 1px solid #abafb0;
+}
+
+.post-footer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px 20px 0;
+    width: 100%;
+    font-weight: bold;
+}
+
+.poster {
+    margin-left: 15px;
+}
+
+.post-caption {
+    padding: 0 15px 10px 15px;
+    width: 100%;
+    text-align: left;
+    max-height: 300px;
+    text-overflow: scroll;
+}
+
+.like-details {
+    vertical-align: middle;
+}
+
+.like-details {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0 10px;
+}
+
+.like-text {
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-bottom: 0;
+}
+
+.fa {
+    font: bold normal normal 17px/1 FontAwesome;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}
+
+.profile-page {
+    margin-top: 7rem;
+    min-width: 280px;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-head-container {
+    width: 100%;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    margin: .5rem;
+    display: flex;
+    flex-direction: row;
+    background-color: #f9fcff;
+    border: 1px solid #3c363450;
+    box-shadow: 3px 2px #3c363430;
+    padding: 20px;
+    margin-bottom: 1rem;
+}
+
+.profile-page-head-img {
+    width: 250px;
+    height: 250px;
+}
+
+.profile-details-container {
+    display: flex;
+    flex-direction: column;
+    margin: 0 30px;
+    text-align: left;
+    min-width: 50%;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 1.5rem;
+    color: #6c757d;
+}
+
+.location, .member-details {
+    text-align: left;
+    margin-bottom: 10px;
+    color: #6c757d;
+}
+
+.biography-details {
+    margin-top: 20px;
+    overflow: hidden;
+    color: #6c757d;
+}
+
+.posts-container {
+    /*margin-left: -25px;*/
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-gap: 10px;
+}
+
+.profile-post-image {
+    width: 100%;
+    height: 400px;
+    max-width: 350px;
+}
+
+.engagement-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+}
+
+.stats {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    align-self: self-start;
+    justify-content: space-between;
+    height: 40%;
+}
+
+.stat {
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-value {
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+.stat-label {
+    color: #b4bcc3;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.follow-btn {
+    width: 90%;
+    margin-top: 30px;
+    height: 50px;
 }
